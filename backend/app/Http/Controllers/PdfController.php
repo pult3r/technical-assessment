@@ -8,19 +8,11 @@ use Dompdf\Dompdf;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Validator;
+use Validator;
+use Illuminate\Support\Facades\DB;
 
 class PdfController extends Controller
 {
-    /**
-     * Generate PDF from posted text.
-     *
-     * - Validates JWT token using centralized config('technical.jwt_secret')
-     * - Validates input text
-     * - Generates QR (SVG) using config('technical.qr_target_url')
-     * - Renders a Blade view to HTML and converts to PDF
-     * - Saves PDF to public disk and returns URL
-     */
     public function generate(Request $request)
     {
         // Only POST allowed
@@ -39,8 +31,7 @@ class PdfController extends Controller
         }
 
         try {
-            // Use centralized technical config (must match token generator)
-            JWT::decode(
+            $payload = JWT::decode(
                 $token,
                 new Key(config('technical.jwt_secret'), 'HS256')
             );
@@ -66,9 +57,18 @@ class PdfController extends Controller
 
         $text = $request->input('text');
 
-        // Generate QR (SVG) using centralized config for target url
-        $qrTarget = config('technical.qr_target_url', 'https://example.com');
+        /*
+        |--------------------------------------------------------------------------
+        | FIX: QR code must receive a STRING, not null
+        |--------------------------------------------------------------------------
+        */
+        $qrTarget = config('technical.qr_target');
 
+        if (!$qrTarget) {
+            $qrTarget = 'https://example.com'; // fallback na wszelki wypadek
+        }
+
+        // Generate QR (SVG)
         $qrSvg = QrCode::format('svg')
             ->size(300)
             ->margin(1)
@@ -95,9 +95,25 @@ class PdfController extends Controller
         $filename = 'pdf/' . uniqid('file_', true) . '.pdf';
         Storage::disk('public')->put($filename, $output);
 
+        $pdfUrl = url('storage/' . $filename);
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSERT LOG INTO pdf_logs (TRIGGER will add audit_log entry)
+        |--------------------------------------------------------------------------
+        */
+
+        DB::table('pdf_logs')->insert([
+            'user_id'      => $payload->sub,
+            'input_text'   => $text,
+            'pdf_filename' => $filename,
+            'pdf_url'      => $pdfUrl,
+            'created_at'   => now(),
+        ]);
+
         return response()->json([
             'success' => true,
-            'pdf_url' => url('storage/' . $filename)
+            'pdf_url' => $pdfUrl
         ]);
     }
 }
