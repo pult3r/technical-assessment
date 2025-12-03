@@ -2,24 +2,54 @@
 
 return [
 
-    // Base application URL
+    /*
+    |--------------------------------------------------------------------------
+    | Base Application URL
+    |--------------------------------------------------------------------------
+    */
     'base_url' => env('APP_URL', 'http://localhost:8080'),
 
-    // JWT secret
-    'jwt_secret' => env('APP_JWT_SECRET', 'change-me-secret'),
+    /*
+    |--------------------------------------------------------------------------
+    | JWT Secret
+    |--------------------------------------------------------------------------
+    | MUST match .env variable JWT_SECRET
+    */
+    'jwt_secret' => env('JWT_SECRET', 'change-me'),
 
-    // JWT expiration time (seconds)
+    /*
+    |--------------------------------------------------------------------------
+    | JWT Expiration (seconds)
+    |--------------------------------------------------------------------------
+    */
     'jwt_exp' => env('APP_JWT_EXP', 3600),
 
-    // Login credentials (DEMO) – in real scenario use database
+    /*
+    |--------------------------------------------------------------------------
+    | Login Credentials (demo)
+    |--------------------------------------------------------------------------
+    | Used ONLY if you have a basic auth fallback
+    */
     'login' => [
         'username' => env('LOGIN_USERNAME', 'admin'),
         'password' => env('LOGIN_PASSWORD', 'password123')
     ],
 
-    // URL for QR
-    'qr_target' => env('QR_TARGET_URL', 'https://student-cribs.com/'),
+    /*
+    |--------------------------------------------------------------------------
+    | QR Target URL
+    |--------------------------------------------------------------------------
+    | MUST match the key expected in PdfController:
+    | config('technical.qr_target_url')
+    */
+    'qr_target_url' => env('QR_TARGET_URL', 'https://student-cribs.com/'),
 
-    // Directory for generated PDFs
+    /*
+    |--------------------------------------------------------------------------
+    | Default directory for generated PDFs
+    |--------------------------------------------------------------------------
+    | Not used by PdfController (it uses Storage::disk('public')),
+    | but left here for consistency.
+    */
     'generated_dir' => env('GENERATED_DIR', 'generated'),
 ];

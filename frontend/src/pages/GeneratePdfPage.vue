@@ -1,21 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row items-center justify-between q-mb-md">
-      <div class="text-h6">{{ t('generator.title') }}</div>
-
-      <div class="row items-center q-gutter-sm">
-        <q-select
-          dense
-          filled
-          v-model="locale"
-          :options="langs"
-          @update:model-value="changeLocale"
-          style="width:120px"
-        />
-
-        <q-btn flat color="negative" :label="t('common.logout')" @click="logout" />
-      </div>
-    </div>
+    <div class="text-h6 q-mb-md">{{ t('generator.title') }}</div>
 
     <q-card class="q-pa-md">
       <auto-expand-input
@@ -42,14 +27,9 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
-import { useAuthStore } from 'src/stores/auth';
 import AutoExpandInput from 'src/components/AutoExpandInput.vue';
 
-const { locale, t } = useI18n();
-const langs = [
-  { label: 'PL', value: 'pl' },
-  { label: 'EN', value: 'en' }
-];
+const { t } = useI18n();
 
 const text = ref('');
 const error = ref(false);
@@ -57,18 +37,9 @@ const errorMessage = ref('');
 const showDialog = ref(false);
 const pdfUrl = ref('');
 
-const auth = useAuthStore();
-
-const changeLocale = val => {
-  locale.value = val;
-  localStorage.setItem('locale', val);
-};
-
-const logout = () => {
-  auth.logout();
-  window.location = '/';
-};
-
+/**
+ * Submit PDF generation request
+ */
 const submit = async () => {
   error.value = false;
 

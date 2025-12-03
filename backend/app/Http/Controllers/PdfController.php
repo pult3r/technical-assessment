@@ -8,10 +8,19 @@ use Dompdf\Dompdf;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class PdfController extends Controller
 {
+    /**
+     * Generate PDF from posted text.
+     *
+     * - Validates JWT token using centralized config('technical.jwt_secret')
+     * - Validates input text
+     * - Generates QR (SVG) using config('technical.qr_target_url')
+     * - Renders a Blade view to HTML and converts to PDF
+     * - Saves PDF to public disk and returns URL
+     */
     public function generate(Request $request)
     {
         // Only POST allowed
@@ -30,9 +39,10 @@ class PdfController extends Controller
         }
 
         try {
+            // Use centralized technical config (must match token generator)
             JWT::decode(
                 $token,
-                new Key(config('assessment.jwt_secret'), 'HS256')
+                new Key(config('technical.jwt_secret'), 'HS256')
             );
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'error' => __('messages.invalid_token')], 401);
@@ -56,12 +66,14 @@ class PdfController extends Controller
 
         $text = $request->input('text');
 
-        // Generate QR (SVG)
+        // Generate QR (SVG) using centralized config for target url
+        $qrTarget = config('technical.qr_target_url', 'https://example.com');
+
         $qrSvg = QrCode::format('svg')
             ->size(300)
             ->margin(1)
             ->errorCorrection('H')
-            ->generate(config('assessment.qr_target_url'));
+            ->generate($qrTarget);
 
         $qrBase64 = base64_encode($qrSvg);
         $qrDataUri = 'data:image/svg+xml;base64,' . $qrBase64;
