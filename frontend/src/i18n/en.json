@@ -1,0 +1,21 @@
+{
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "password": "Password",
+    "button": "Sign in",
+    "error": "Invalid username or password."
+  },
+  "generator": {
+    "title": "PDF Generator",
+    "placeholder": "Enter text...",
+    "button": "Generate PDF",
+    "dialog_title": "Generated PDF",
+    "error": "Failed to generate the PDF.",
+    "validation_required": "Text field cannot be empty."
+  },
+  "common": {
+    "logout": "Logout",
+    "language": "Language"
+    }
+}

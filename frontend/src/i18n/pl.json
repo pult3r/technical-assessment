@@ -1,0 +1,21 @@
+{
+  "login": {
+    "title": "Logowanie",
+    "username": "Nazwa użytkownika",
+    "password": "Hasło",
+    "button": "Zaloguj",
+    "error": "Nieprawidłowy login lub hasło."
+  },
+  "generator": {
+    "title": "Generator PDF",
+    "placeholder": "Wpisz tekst...",
+    "button": "Generuj PDF",
+    "dialog_title": "Wygenerowany PDF",
+    "error": "Nie udało się wygenerować PDF.",
+    "validation_required": "Pole tekstowe nie może być puste."
+  },
+  "common": {
+    "logout": "Wyloguj",
+    "language": "Język"
+    }
+}
