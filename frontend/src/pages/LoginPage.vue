@@ -1,92 +1,56 @@
 <template>
-  <q-page class="flex flex-center">
-
-    <!-- LANGUAGE SELECTOR -->
-    <div class="absolute-top-right q-pa-md">
-      <q-select
-        v-model="currentLocale"
-        :options="locales"
-        dense
-        borderless
-        emit-value
-        map-options
-        style="width: 90px"
-        @update:model-value="changeLanguage"
-      />
-    </div>
-
-    <!-- LOGIN CARD -->
-    <q-card style="width: 350px; max-width: 90%">
+  <q-page class="q-pa-md flex flex-center">
+    <q-card class="q-pa-lg" style="width:420px;max-width:90%;">
       <q-card-section>
         <div class="text-h6">{{ t('login.title') }}</div>
       </q-card-section>
 
-      <q-card-section>
-        <q-input
-          v-model="username"
-          :label="t('login.username')"
-          filled
-          class="q-mb-md"
-        />
+      <q-form @submit.prevent="submit">
+        <q-card-section>
+          <q-input filled v-model="username" :label="t('login.username')" />
+          <q-input filled v-model="password" type="password" class="q-mt-md"
+                   :label="t('login.password')" />
+        </q-card-section>
 
-        <q-input
-          v-model="password"
-          :label="t('login.password')"
-          type="password"
-          filled
-        />
-      </q-card-section>
-
-      <q-card-actions align="right">
-        <q-btn
-          color="primary"
-          :label="t('login.button')"
-          @click="submit"
-        />
-      </q-card-actions>
-
-      <q-card-section v-if="error">
-        <q-banner class="bg-red-4 text-white">
+        <q-card-section v-if="error" class="text-negative">
           {{ errorMessage }}
-        </q-banner>
-      </q-card-section>
-    </q-card>
+        </q-card-section>
 
+        <q-card-actions align="between">
+          <q-btn type="submit" color="primary" :label="t('login.button')" />
+
+          <q-btn flat color="secondary" :label="t('login.go_register')"
+                 @click="router.push('/register')" />
+        </q-card-actions>
+      </q-form>
+    </q-card>
   </q-page>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
 import { useAuthStore } from 'src/stores/auth';
+import { useRouter } from 'vue-router';
 
 const username = ref('');
 const password = ref('');
 const error = ref(false);
 const errorMessage = ref('');
 
-const { t, locale } = useI18n();
-const auth = useAuthStore();
+const { t } = useI18n();
 const router = useRouter();
+const auth = useAuthStore();
 
-/* Language selector */
-const locales = [
-  { label: 'PL', value: 'pl' },
-  { label: 'EN', value: 'en' }
-];
-
-const currentLocale = ref(localStorage.getItem('locale') || 'pl');
-
-const changeLanguage = (lang) => {
-  locale.value = lang;
-  localStorage.setItem('locale', lang);
-};
-
-/* Login submit */
 const submit = async () => {
   error.value = false;
+
+  if (!username.value || !password.value) {
+    error.value = true;
+    errorMessage.value = t('login.validation_required');
+    return;
+  }
 
   try {
     const res = await api.post('/login', {
@@ -96,7 +60,6 @@ const submit = async () => {
 
     auth.setToken(res.data.token);
     router.push('/generator');
-
   } catch {
     error.value = true;
     errorMessage.value = t('login.error');

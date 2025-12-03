@@ -4,7 +4,22 @@
     "username": "Nazwa użytkownika",
     "password": "Hasło",
     "button": "Zaloguj",
-    "error": "Nieprawidłowy login lub hasło."
+    "go_register": "Utwórz konto",
+    "error": "Nieprawidłowy login lub hasło.",
+    "validation_required": "Wszystkie pola są wymagane."
+  },
+  "register": {
+    "title": "Rejestracja",
+    "username": "Nazwa użytkownika",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "button": "Zarejestruj",
+    "go_login": "Masz już konto? Zaloguj się",
+    "error": "Nie udało się utworzyć konta.",
+    "validation_username": "Nazwa użytkownika musi mieć co najmniej 3 znaki.",
+    "validation_email": "Nieprawidłowy adres e-mail.",
+    "validation_password": "Hasło musi mieć co najmniej 6 znaków.",
+    "validation_required": "Wszystkie pola są wymagane."
   },
   "generator": {
     "title": "Generator PDF",
@@ -17,5 +32,5 @@
   "common": {
     "logout": "Wyloguj",
     "language": "Język"
-    }
+  }
 }

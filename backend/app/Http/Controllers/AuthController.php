@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     /**
-     * Login endpoint returning JWT.
+     * LOGIN
      */
     public function login(Request $request)
     {
@@ -32,24 +34,57 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Load credentials from config
-        $configUser = config('technical.login.username');
-        $configPass = config('technical.login.password');
+        $user = User::where('username', $username)->first();
 
-        // Compare credentials
-        if ($username !== $configUser || $password !== $configPass) {
+        if (!$user || !Hash::check($password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'error' => __('messages.login_invalid')
             ], 401);
         }
 
-        // Generate JWT
+        return $this->makeJwtResponse($user);
+    }
+
+    /**
+     * REGISTER
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|min:3|max:50|unique:users',
+            'email'    => 'required|email|max:100|unique:users',
+            'password' => 'required|min:6|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error'   => $validator->errors()->first()
+            ], 422);
+        }
+
+        // utworzenie usera
+        $user = User::create([
+            'username' => $request->username,
+            'email'    => $request->email,
+            'password' => $request->password, 
+        ]);
+
+        return $this->makeJwtResponse($user);
+    }
+
+    /**
+     * JWT generator
+     */
+    private function makeJwtResponse(User $user)
+    {
         $secret = config('technical.jwt_secret');
-        $exp = time() + config('technical.jwt_exp');
+        $exp    = time() + config('technical.jwt_exp');
 
         $payload = [
-            'sub' => $username,
+            'sub' => $user->id,
+            'username' => $user->username,
             'iat' => time(),
             'exp' => $exp
         ];
@@ -59,7 +94,11 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'token' => $token,
-            'expires_at' => $exp
+            'expires_at' => $exp,
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username
+            ]
         ]);
     }
 }

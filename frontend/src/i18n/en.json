@@ -4,7 +4,22 @@
     "username": "Username",
     "password": "Password",
     "button": "Sign in",
-    "error": "Invalid username or password."
+    "go_register": "Create account",
+    "error": "Invalid username or password.",
+    "validation_required": "All fields are required."
+  },
+  "register": {
+    "title": "Register",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "button": "Create account",
+    "go_login": "Already have an account? Login",
+    "error": "Account creation failed.",
+    "validation_username": "Username must have at least 3 characters.",
+    "validation_email": "Invalid email format.",
+    "validation_password": "Password must have at least 6 characters.",
+    "validation_required": "All fields are required."
   },
   "generator": {
     "title": "PDF Generator",
@@ -17,5 +32,5 @@
   "common": {
     "logout": "Logout",
     "language": "Language"
-    }
+  }
 }

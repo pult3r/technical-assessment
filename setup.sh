@@ -35,7 +35,7 @@ docker system prune -af --volumes || true
 # 3. Folder structure
 # -------------------------
 echo "📁 Creating folder structure..."
-mkdir -p backend frontend docker/nginx
+mkdir -p backend frontend docker/nginx docker/php
 
 # -------------------------
 # 4. Install Laravel backend
@@ -74,10 +74,10 @@ echo "📦 Installing frontend dependencies..."
 npm install axios
 npm install jwt-decode
 npm install @vueuse/core
+npm install pinia
+npm install vue-i18n@9
 
 echo "🧹 Removing .git inside frontend (twice – Quasar bug)..."
-
-
 rm -rf .git || true
 
 cd ..
@@ -96,7 +96,32 @@ find . -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
 echo "✔️ All .git directories removed."
 
 # -------------------------
-# 6. Create NGINX config
+# 6. Create PHP Dockerfile (with pdo_mysql)
+# -------------------------
+echo "📝 Creating PHP Dockerfile..."
+
+cat > docker/php/Dockerfile <<'DOCKERFILE'
+FROM php:8.4-fpm
+
+# Install system dependencies and PHP extensions
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libicu-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    && docker-php-ext-install pdo pdo_mysql zip
+
+# Install Composer (from official composer image)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+DOCKERFILE
+
+# -------------------------
+# 7. Create NGINX config
 # -------------------------
 echo "📝 Creating nginx config..."
 cat > docker/nginx/default.conf <<'NGINX'
@@ -121,13 +146,15 @@ server {
 NGINX
 
 # -------------------------
-# 7. docker-compose
+# 8. docker-compose
 # -------------------------
 echo "📜 Creating docker-compose.yml..."
 cat > docker-compose.yml <<'YAML'
 services:
   php:
-    image: php:8.4-fpm
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: tech-php
     working_dir: /var/www/html
     volumes:
@@ -175,13 +202,13 @@ networks:
 YAML
 
 # -------------------------
-# 8. Run Docker
+# 9. Run Docker
 # -------------------------
 echo "🚀 Starting backend (Docker)..."
 docker compose up -d --build
 
 # -------------------------
-# 9. Final info
+# 10. Final info
 # -------------------------
 echo ""
 echo "✅ Done."
@@ -199,4 +226,4 @@ echo ""
 echo "NOTE:"
 echo "- ALL .git folders were removed so you can initialize ONE repo cleanly."
 echo "- Backend: JWT + PDF + QR libraries installed."
-echo "- Frontend: axios + jwt-decode + vueuse installed."
+echo "- Frontend: axios + jwt-decode + vueuse + pinia + vue-i18n installed."
