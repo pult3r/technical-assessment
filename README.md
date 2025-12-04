@@ -1,34 +1,34 @@
-# Technical Assessment — Laravel + Quasar + Docker (Updated)
+# Technical Assessment — Laravel + Quasar + Docker (FINAL v3)
 
 ## 📘 Overview
 
-Complete development environment using:
+This documentation provides a clear, step-by-step installation guide  
+for running:
 
 - Laravel 11 (backend)
 - Quasar / Vue 3 (frontend)
 - MySQL 8
+- PHP-FPM 8.4
 - Nginx
-- PHP 8.4
 - phpMyAdmin
 - Docker Compose
 
-This README explains **step-by-step**, from cloning the repo to running backend & frontend successfully.
-*(Updated: clarifies Quasar dev server port and how to run frontend locally or in Docker.)*
+ALL required migrations (including `sessions`) are included in the repo.
 
 ---
 
 # 🚀 1. Requirements
 
-Install:
+Install on your host machine:
 
-- Docker + Docker Compose  
-- Node.js ≥ 18  
-- npm  
-- (Later) Quasar CLI  
+- **Docker** + **Docker Compose**
+- **Node.js ≥ 18**
+- **npm**
+- (optional) **Quasar CLI** — can also use `npx`
 
 ---
 
-# 🚀 2. Clone Project
+# 🚀 2. Clone the project
 
 ```bash
 git clone https://github.com/pult3r/technical-assessment.git
@@ -45,7 +45,7 @@ composer install
 cp .env.example .env
 ```
 
-### ✔️ `.env` MUST contain:
+### ✔️ Configure `.env` (already correct in repo)
 
 ```
 APP_NAME=Laravel
@@ -70,9 +70,9 @@ Session storage uses the database.
 
 ---
 
-# 🚀 4. Start Docker Environment (backend + db + nginx)
+# 🚀 4. Start Docker (backend + DB + nginx)
 
-From project root:
+From the project root:
 
 ```bash
 cd ..
@@ -80,18 +80,18 @@ docker compose down -v
 docker compose up -d --build
 ```
 
-### Containers:
+### Running services:
 
-| Service      | Role               | URL / Notes                  |
-|--------------|--------------------|-------------------------------|
-| tech-php     | PHP-FPM + Laravel  | Internal                      |
-| tech-nginx   | Web server         | http://localhost:8080         |
-| tech-mysql   | MySQL 8            | Port 3307 → 3306              |
-| tech-pma     | phpMyAdmin         | http://localhost:8081         |
+| Container     | Role              | URL                     |
+|---------------|-------------------|--------------------------|
+| tech-php      | Laravel backend   | internal only            |
+| tech-nginx    | Web server        | http://localhost:8080    |
+| tech-mysql    | MySQL 8           | 3307 → 3306              |
+| tech-pma      | phpMyAdmin        | http://localhost:8081    |
 
 ---
 
-# 🚀 5. Run Laravel Migrations
+# 🚀 5. Run Laravel migrations
 
 Enter PHP container:
 
@@ -99,41 +99,57 @@ Enter PHP container:
 docker exec -it tech-php bash
 ```
 
-### Generate app key:
+Inside container:
 
 ```bash
 php artisan key:generate
-```
-
-### Run migrations:
-
-```bash
 php artisan migrate -v
 ```
 
-This automatically creates tables:
+ALL tables including **sessions** will be created.
 
-- users  
-- audit_log  
-- pdf_logs  
-- sessions (included in repo!)  
-- triggers  
+### IMPORTANT — leave the container now:
 
-✔️ No need to generate sessions migration manually.
+```bash
+exit
+```
+
+If you don't exit, you will NOT be able to run frontend commands!
 
 ---
 
-# 📄 6. Sessions Migration Included in Repo
+# 🚀 6. Frontend Setup (Quasar)
 
-File:
+On your **host machine** (NOT inside container):
+
+```bash
+cd frontend
+npm install
+```
+
+### Start dev server (explicit port 9000 to avoid conflicts):
+
+Using local Quasar CLI:
+
+```bash
+quasar dev --port 9000 --hostname 0.0.0.0
+```
+
+If you don't have Quasar CLI installed globally:
+
+```bash
+npx quasar dev --port 9000 --hostname 0.0.0.0
+```
+
+👉 Frontend will be available at:
 
 ```
-backend/database/migrations/2024_01_05_000000_create_sessions_table.php
+http://localhost:9000
 ```
 
 ---
 
-# 🚀 7. phpMyAdmin Access
+# 🚀 7. phpMyAdmin
 
 ```
 http://localhost:8081
@@ -150,124 +166,56 @@ Database: technical
 
 ---
 
-# 🚀 8. Frontend Setup (Quasar) — IMPORTANT: ports & where to run
+# 📄 8. Sessions migration included in repo
 
-**Key point:** The frontend must be run on your *host machine* (or in a dedicated Node container).  
-**Do not** run `npm` / `quasar` commands inside the `tech-php` container.
-
-Quasar dev server by default (when started inside the Docker example below) is started on **port 9000**. If you run it locally without specifying a port, it may choose a different port (often 8080). To avoid confusion, the README below uses **9000** for Docker-based frontend and **5174/8080/9000** options for local runs — you can set the port explicitly.
+`backend/database/migrations/2024_01_05_000000_create_sessions_table.php`  
+(Already applied by `php artisan migrate`)
 
 ---
 
-## Option A — Run frontend locally (recommended for development)
+# 🧪 9. Troubleshooting
 
-On your host machine (not inside any Docker container):
+### ❌ Error: `cd frontend` inside container
+You're still inside tech-php.  
+Solution:
 
 ```bash
+exit
 cd frontend
-npm install
 ```
 
-If you have Quasar CLI installed globally:
+### ❌ Error: `npm: command not found`
+You are still inside Docker.  
+Node is only installed on host.
+
+### ❌ Error: SQLSTATE[HY000] [2002] Connection refused
+You ran Artisan **outside Docker**.  
+Always run inside:
 
 ```bash
-quasar dev --port 9000 --hostname 0.0.0.0
-# or change port to 8080 if you prefer:
-# quasar dev --port 8080 --hostname 0.0.0.0
+docker exec -it tech-php bash
 ```
 
-If you don't have Quasar CLI globally:
-
-```bash
-npx quasar dev --port 9000 --hostname 0.0.0.0
-```
-
-**Frontend dev server will be available at:** `http://localhost:9000` (or `http://localhost:8080` if you chose 8080).
+### ❌ Sessions table missing
+Not applicable — migration is included.
 
 ---
 
-## Option B — Run frontend in a temporary Node Docker container (no local Node install)
+# 🎉 10. Everything is ready
 
-From project root (host):
+You now have:
 
-```bash
-docker run --rm -it   -v "$PWD/frontend":/app   -w /app   -p 9000:9000   node:18-bullseye   bash -lc "npm install && npx quasar dev --host 0.0.0.0 --port 9000"
-```
+✔ Fully working backend (Laravel)  
+✔ Fully working frontend (Quasar)  
+✔ Dockerized services  
+✔ No manual migrations needed  
+✔ Clean and consistent installation workflow  
 
-Frontend will be exposed at `http://localhost:9000`.
+If you'd like:
 
----
+- a `frontend` service added to docker-compose,  
+- Makefile automation (`make up`, `make migrate`, etc.),  
+- production docker-compose setup,  
+- CI/CD pipeline,  
 
-## Option C — Add frontend service to docker-compose (recommended for containerized dev)
-
-Add this service to your `docker-compose.yml` under `services:`:
-
-```yaml
-  frontend:
-    image: node:18-bullseye
-    container_name: tech-frontend
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    ports:
-      - "9000:9000"
-    command: bash -c "npm install && npx quasar dev --host 0.0.0.0 --port 9000"
-    networks:
-      - appnet
-```
-
-Then start it:
-
-```bash
-docker compose up -d frontend
-```
-
-Frontend will be available at `http://localhost:9000`.
-
----
-
-# 🧪 9. Troubleshooting — Quasar port gotcha
-
-- If you run `quasar dev` and the server reports a port (e.g. `9000`), make sure you're opening that port in the browser.  
-- If port `9000` is already used, pick another port explicitly: `quasar dev --port 8080` or `npx quasar dev --port 5174`.  
-- If running inside Docker, ensure `ports:` in `docker-compose.yml` maps the container port to the host (e.g. `"9000:9000"`).
-
----
-
-# 🧪 10. Other Common Issues
-
-### ❌ `zsh: command not found: quasar`
-Install CLI:
-
-```
-npm install -g @quasar/cli
-```
-
-Or use `npx quasar ...`.
-
----
-
-### ❌ `SQLSTATE[HY000] [2002] Connection refused`
-You executed `php artisan` **on host**, not in Docker. Run artisan inside `tech-php`.
-
----
-
-### ❌ `Table 'technical.sessions' doesn't exist`
-Not applicable — migration included.
-
----
-
-# 🎉 11. Done
-
-You now have clear instructions about Quasar dev server port and where to run frontend commands.
-
----
-
-If you want, I'll:
-
-- update the actual `docker-compose.yml` with the `frontend` service and create a PR,  
-- add a Makefile with `make frontend` shortcut,  
-- or change Quasar dev port to 8080 in the template.
-
-Tell me which you'd like me to do next.
+just tell me!
