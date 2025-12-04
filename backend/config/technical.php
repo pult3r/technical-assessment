@@ -4,52 +4,50 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Base Application URL
+    | Base App URL
     |--------------------------------------------------------------------------
     */
     'base_url' => env('APP_URL', 'http://localhost:8080'),
 
     /*
     |--------------------------------------------------------------------------
-    | JWT Secret
+    | JWT
     |--------------------------------------------------------------------------
-    | MUST match .env variable JWT_SECRET
     */
-    'jwt_secret' => env('JWT_SECRET', 'change-me'),
+    'jwt_secret' => env('APP_JWT_SECRET', 'change-me-secret'),
+    'jwt_exp'    => env('APP_JWT_EXP', 3600),
 
     /*
     |--------------------------------------------------------------------------
-    | JWT Expiration (seconds)
+    | Demo login (only for testing)
     |--------------------------------------------------------------------------
-    */
-    'jwt_exp' => env('APP_JWT_EXP', 3600),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Login Credentials (demo)
-    |--------------------------------------------------------------------------
-    | Used ONLY if you have a basic auth fallback
     */
     'login' => [
         'username' => env('LOGIN_USERNAME', 'admin'),
-        'password' => env('LOGIN_PASSWORD', 'password123')
+        'password' => env('LOGIN_PASSWORD', 'password123'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | QR Target URL
+    | QR code configuration
     |--------------------------------------------------------------------------
-    | MUST match the key expected in PdfController:
-    | config('technical.qr_target_url')
     */
-    'qr_target_url' => env('QR_TARGET_URL', 'https://student-cribs.com/'),
+    'qr' => [
+        'target_url'       => env('QR_TARGET_URL', 'https://student-cribs.com/'),
+        'size'             => env('QR_SIZE', 300),
+        'margin'           => env('QR_MARGIN', 1),
+        'error_correction' => env('QR_ECC', 'H'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
-    | Default directory for generated PDFs
+    | PDF Generation Settings
     |--------------------------------------------------------------------------
-    | Not used by PdfController (it uses Storage::disk('public')),
-    | but left here for consistency.
     */
-    'generated_dir' => env('GENERATED_DIR', 'generated'),
+    'pdf' => [
+        'storage_dir'      => env('PDF_DIR', 'pdf'),
+        'paper_format'     => env('PDF_PAPER', 'A4'),
+        'paper_orientation'=> env('PDF_ORIENT', 'portrait'),
+        'css_path'         => resource_path('views/pdf/style.css'),
+    ],
 ];

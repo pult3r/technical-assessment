@@ -9,13 +9,11 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Validator;
-use Illuminate\Support\Facades\DB;
 
 class PdfController extends Controller
 {
     public function generate(Request $request)
     {
-        // Only POST allowed
         if (!$request->isMethod('post')) {
             return response()->json([
                 'success' => false,
@@ -23,15 +21,13 @@ class PdfController extends Controller
             ], 405);
         }
 
-        // JWT validation
         $token = $request->bearerToken();
-
         if (!$token) {
             return response()->json(['success' => false, 'error' => __('messages.unauthorized')], 401);
         }
 
         try {
-            $payload = JWT::decode(
+            JWT::decode(
                 $token,
                 new Key(config('technical.jwt_secret'), 'HS256')
             );
@@ -39,13 +35,8 @@ class PdfController extends Controller
             return response()->json(['success' => false, 'error' => __('messages.invalid_token')], 401);
         }
 
-        // VALIDATION
         $validator = Validator::make($request->all(), [
             'text' => 'required|string|min:1|max:5000'
-        ], [
-            'text.required' => __('pdf.validation_required'),
-            'text.min'      => __('pdf.validation_required'),
-            'text.max'      => __('pdf.validation_max'),
         ]);
 
         if ($validator->fails()) {
@@ -59,61 +50,50 @@ class PdfController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FIX: QR code must receive a STRING, not null
+        | Load QR settings from config
         |--------------------------------------------------------------------------
         */
-        $qrTarget = config('technical.qr_target');
+        $qrTarget = config('technical.qr.target_url');
+        $qrSize   = config('technical.qr.size');
+        $qrMargin = config('technical.qr.margin');
+        $qrECC    = config('technical.qr.error_correction');
 
-        if (!$qrTarget) {
-            $qrTarget = 'https://example.com'; // fallback na wszelki wypadek
-        }
-
-        // Generate QR (SVG)
         $qrSvg = QrCode::format('svg')
-            ->size(300)
-            ->margin(1)
-            ->errorCorrection('H')
+            ->size($qrSize)
+            ->margin($qrMargin)
+            ->errorCorrection($qrECC)
             ->generate($qrTarget);
 
-        $qrBase64 = base64_encode($qrSvg);
-        $qrDataUri = 'data:image/svg+xml;base64,' . $qrBase64;
+        $qrDataUri = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
-        // Generate HTML from Blade
+        /*
+        |--------------------------------------------------------------------------
+        | Render PDF
+        |--------------------------------------------------------------------------
+        */
         $html = view('pdf.template', [
             'text' => $text,
             'qr'   => $qrDataUri
         ])->render();
 
-        // Generate PDF
+        $paper = config('technical.pdf.paper_format');
+        $orientation = config('technical.pdf.paper_orientation');
+
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper($paper, $orientation);
         $dompdf->render();
+
         $output = $dompdf->output();
 
-        // Save PDF
-        $filename = 'pdf/' . uniqid('file_', true) . '.pdf';
+        $dir = config('technical.pdf.storage_dir');
+        $filename = $dir . '/' . uniqid('file_', true) . '.pdf';
+
         Storage::disk('public')->put($filename, $output);
-
-        $pdfUrl = url('storage/' . $filename);
-
-        /*
-        |--------------------------------------------------------------------------
-        | INSERT LOG INTO pdf_logs (TRIGGER will add audit_log entry)
-        |--------------------------------------------------------------------------
-        */
-
-        DB::table('pdf_logs')->insert([
-            'user_id'      => $payload->sub,
-            'input_text'   => $text,
-            'pdf_filename' => $filename,
-            'pdf_url'      => $pdfUrl,
-            'created_at'   => now(),
-        ]);
 
         return response()->json([
             'success' => true,
-            'pdf_url' => $pdfUrl
+            'pdf_url' => url('storage/' . $filename)
         ]);
     }
 }

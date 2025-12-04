@@ -3,22 +3,9 @@
 <head>
     <meta charset="utf-8">
 
+    <!-- External CSS -->
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            margin: 30px;
-        }
-        .content {
-            font-size: 14pt;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-        }
-        .qr {
-            margin-top: 30px;
-        }
-        .qr img {
-            width: 200px;
-        }
+        {!! file_get_contents(config('technical.pdf.css_path')) !!}
     </style>
 </head>
 <body>
