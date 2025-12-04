@@ -1,39 +1,31 @@
-# Technical Assessment – Laravel + Quasar + Docker
+# Technical Assessment — Laravel + Quasar + Docker
 
-This project is a full-stack application built using:
+## 📘 Overview
 
-- Laravel 12 (PHP 8.4)
-- Quasar Framework (Vue 3 SPA)
+This project contains a complete development environment based on Docker, running:
+
+- Laravel 11 (backend)
+- Quasar (frontend)
+- Nginx
+- PHP-FPM (PHP 8.4)
 - MySQL 8
-- Docker & Docker Compose
-- Dompdf – PDF generator
-- Simple QrCode – QR code encoder
-- MySQL triggers – audit logging
-
-The environment is fully dockerized — no local PHP/MySQL required.
+- phpMyAdmin
 
 ---
 
-# 1. Requirements
+## 📦 Project Structure
 
-Install locally:
-
-- Docker 25+
-- Docker Compose v2+
-- Node.js 18+
-- npm 9+
-
-Works on:
-
-- macOS
-- Linux
-- Windows (WSL2 recommended)
+```
+technical-assessment/
+ ├── backend/       → Laravel API
+ ├── frontend/      → Quasar SPA
+ ├── docker/        → Docker config files
+ └── docker-compose.yml
+```
 
 ---
 
-# 2. Project Setup (from zero)
-
-Clone repository:
+## 🚀 1. Clone and Setup
 
 ```bash
 git clone https://github.com/pult3r/technical-assessment.git
@@ -42,63 +34,19 @@ cd technical-assessment
 
 ---
 
-# 3. Start Docker Environment
+## 🚀 2. Backend Setup (Laravel)
+
+### Install dependencies:
 
 ```bash
-docker compose up -d --build
-```
-
-Running services:
-
-| Service | URL |
-|--------|------|
-| Backend API (Laravel) | http://localhost:8080 |
-| phpMyAdmin | http://localhost:8081 |
-| MySQL | local port 3307 → container 3306 |
-| Quasar frontend | http://localhost:5173 |
-
----
-
-# 4. Backend Setup (Laravel)
-
-Enter the PHP container:
-
-```bash
-docker exec -it tech-php bash
-cd /var/www/html
-```
-
-Install composer dependencies (if needed):
-
-```bash
+cd backend
 composer install
-```
-
-Create storage link:
-
-```bash
-php artisan storage:link
-```
-
----
-
-# 5. Configure Environment (.env)
-
-Create `.env`:
-
-```bash
 cp .env.example .env
 ```
 
-Or manually:
+### Set correct DB configuration in `.env`:
 
 ```
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=
-APP_URL=http://localhost:8080
-APP_DEBUG=true
-
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
@@ -106,200 +54,134 @@ DB_DATABASE=technical
 DB_USERNAME=root
 DB_PASSWORD=root
 
-FILESYSTEM_DISK=public
-
-LOGIN_USERNAME=admin
-LOGIN_PASSWORD=password123
-
-APP_JWT_SECRET=supersecret123456
-APP_JWT_EXP=3600
-
-QR_TARGET_URL=https://student-cribs.com/
-QR_SIZE=300
-QR_MARGIN=1
-QR_ECC=H
-
-PDF_DIR=pdf
-PDF_PAPER=A4
-PDF_ORIENT=portrait
+SESSION_DRIVER=database
 ```
 
-Generate Laravel key:
+---
+
+## 🚀 3. Docker Setup
+
+From project root:
+
+```bash
+cd ..
+docker compose down -v
+docker compose up -d --build
+```
+
+### Containers:
+
+| Service      | URL / Name                  |
+|--------------|------------------------------|
+| php          | tech-php                     |
+| nginx        | http://localhost:8080        |
+| mysql        | tech-mysql (3307 → 3306)     |
+| phpMyAdmin   | http://localhost:8081        |
+
+---
+
+## 🚀 4. Laravel Commands
+
+Enter PHP container:
+
+```bash
+docker exec -it tech-php bash
+```
+
+### Generate app key:
 
 ```bash
 php artisan key:generate
 ```
 
----
-
-# 6. Migrations
-
-Inside the container:
+### Run migrations:
 
 ```bash
 php artisan migrate
 ```
 
-This creates:
+If sessions table is missing:
 
-- users
-- audit_log
-- pdf_logs
-- MySQL triggers for user actions and PDF logs
+```bash
+php artisan make:migration create_sessions_table
+php artisan migrate
+```
 
 ---
 
-# 7. Frontend Setup (Quasar)
+## 🚀 5. phpMyAdmin
 
-Open a new terminal:
+```
+http://localhost:8081
+```
+
+Login:
+
+```
+Host: mysql
+User: root
+Pass: root
+DB: technical
+```
+
+---
+
+## 🚀 6. Frontend (Quasar)
 
 ```bash
 cd frontend
 npm install
-npm run dev -- --host 0.0.0.0 --port 5173
-```
-
-Frontend runs at:
-
-```
-http://localhost:5173
+quasar dev
 ```
 
 ---
 
-# 8. Authentication
+## 🧪 7. Common Issues
 
-Default login (from .env):
+### ❌ `SQLSTATE[HY000] [2002] Connection refused`
 
-```
-username: admin
-password: password123
-```
-
-You can also register new users.
-
-JWT token is stored automatically by the frontend (Pinia).
-
----
-
-# 9. PDF Generation
-
-Use the frontend or call API:
-
-```
-POST /api/generate-pdf
-Authorization: Bearer <JWT>
-```
-
-Response contains:
-
-```
-pdf_url: http://localhost:8080/storage/pdf/xxxx.pdf
-```
-
-PDF includes:
-
-- user text
-- embedded QR code
-- A4 layout
-- saved to storage/app/public/pdf/
-
----
-
-# 10. Audit Log (Triggers)
-
-Two audit systems:
-
-| Table | Description |
-|--------|------------|
-| audit_log | Tracks INSERT, UPDATE, DELETE on users |
-| pdf_logs | Logs every generated PDF |
-
-Laravel middleware:
-
-- jwt.auth → validates JWT  
-- mysql.user → injects @user_id into MySQL session  
-
-Triggers use @user_id to record the user performing actions.
-
----
-
-# 11. Reset Environment
-
-If something breaks:
-
-```bash
-docker compose down
-docker compose up -d --build
-```
-
-Refresh Laravel:
+You ran artisan **outside** Docker.  
+Use:
 
 ```bash
 docker exec -it tech-php bash
-cd /var/www/html
+```
 
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
+### ❌ `Table 'technical.sessions' doesn't exist`
+
+Create migration manually:
+
+```bash
+php artisan make:migration create_sessions_table
 php artisan migrate
 ```
 
 ---
 
-# 12. API Testing Examples
+## 🛠 8. Recommended Adjustments
 
-Login:
+### Add MySQL user in docker-compose:
 
-```bash
-curl -X POST http://localhost:8080/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"password123"}'
+```
+environment:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: technical
+  MYSQL_USER: app
+  MYSQL_PASSWORD: secret
 ```
 
-Generate PDF:
+And update `.env`:
 
-```bash
-curl -X POST http://localhost:8080/api/generate-pdf \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Hello world"}'
 ```
+DB_USERNAME=app
+DB_PASSWORD=secret
+```
+
+### Add sessions migration to the repo for all developers.
 
 ---
 
-# 13. Project Structure
+## 🎉 Finished!
 
-```
-backend/
-  app/
-  config/
-  routes/
-  database/
-  storage/
+Your environment should now run flawlessly.
 
-frontend/
-  src/
-
-docker/
-  php/
-  nginx/
-
-docker-compose.yml
-```
-
----
-
-# 14. Summary
-
-This project provides:
-
-- Fully dockerized Laravel + Quasar stack  
-- JWT-secured API  
-- PDF generation with QR code  
-- MySQL-based audit logging with triggers  
-- Clean configuration via .env and config files  
-- Production-ready architecture  
-- Easy installation on any system (Linux/macOS/Windows)  
-
-Ideal for technical assessments, portfolio, real applications.
