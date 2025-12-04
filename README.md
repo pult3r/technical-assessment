@@ -1,23 +1,29 @@
-# Technical Assessment — Laravel + Quasar + Docker  
-## ⭐ FINAL README (Working 100% After Clean Installation)
+# Technical Assessment — Laravel + Quasar + Docker
 
-This guide describes **exactly** how to install and run the project step‑by‑step.  
-Follow it precisely — everything will work on first run.
+This guide describes the installation and setup process for the project, including:
+
+- Laravel backend
+- Quasar frontend
+- MySQL database
+- Nginx
+- phpMyAdmin
+- Docker Compose
+
+Follow each step to configure the environment properly.
 
 ---
 
-# 📦 1. Requirements
+## 1. Requirements
 
-Install on your **host machine**:
+Install on your host machine:
 
 - Docker + Docker Compose  
 - Node.js ≥ 18  
 - npm  
-- (optional) Quasar CLI (not required)
 
 ---
 
-# 🚀 2. Clone the project
+## 2. Clone the repository
 
 ```bash
 git clone https://github.com/pult3r/technical-assessment.git
@@ -26,7 +32,7 @@ cd technical-assessment
 
 ---
 
-# 🚀 3. Backend installation (Laravel)
+## 3. Backend setup (Laravel)
 
 ```bash
 cd backend
@@ -34,7 +40,7 @@ composer install
 cp .env.example .env
 ```
 
-Your preconfigured `.env` should already contain:
+The `.env` file is already configured for Docker:
 
 ```
 DB_CONNECTION=mysql
@@ -47,13 +53,11 @@ DB_PASSWORD=root
 SESSION_DRIVER=database
 ```
 
-All required migrations (including *sessions*) exist in the project.
-
 ---
 
-# 🚀 4. Start Docker environment
+## 4. Start Docker environment
 
-From the **root directory**:
+From the project root:
 
 ```bash
 cd ..
@@ -61,17 +65,17 @@ docker compose down -v
 docker compose up -d --build
 ```
 
-### Services now running:
+Services:
 
-| Service     | URL / Info                  |
-|-------------|------------------------------|
-| Backend API | http://localhost:8080        |
-| phpMyAdmin  | http://localhost:8081        |
-| MySQL       | Port 3307 → 3306 inside      |
+| Service     | URL                     |
+|-------------|--------------------------|
+| Backend     | http://localhost:8080    |
+| phpMyAdmin  | http://localhost:8081    |
+| MySQL       | Host: mysql, Port: 3306  |
 
 ---
 
-# 🚀 5. Run Laravel migrations
+## 5. Run Laravel migrations
 
 Enter the PHP container:
 
@@ -86,9 +90,7 @@ php artisan key:generate
 php artisan migrate -v
 ```
 
-> ✔ All tables including **sessions** will be created.
-
-Now **EXIT the container** — this is important:
+Then exit:
 
 ```bash
 exit
@@ -96,80 +98,86 @@ exit
 
 ---
 
-# 🚀 6. Frontend installation (Quasar) — run on HOST, not in Docker
+## 6. Frontend setup (Quasar)
+
+All frontend commands must be run on the **host**, not inside Docker.
 
 ```bash
 cd frontend
 npm install
 ```
 
-Run the dev server on the correct port (Vite default):
+Start the development server:
 
 ```bash
 npx quasar dev --port 5173 --hostname 0.0.0.0
 ```
 
-If you have global Quasar CLI:
-
-```bash
-quasar dev --port 5173 --hostname 0.0.0.0
-```
-
 Frontend is available at:
 
-👉 **http://localhost:5173/**
+```
+http://localhost:5173
+```
 
 ---
 
-# 🌐 7. phpMyAdmin access
+## 7. phpMyAdmin
 
-Visit:
+Access via browser:
 
-👉 http://localhost:8081
+```
+http://localhost:8081
+```
 
-Credentials:
+Database login:
 
 ```
 Host: mysql
 User: root
-Pass: root
+Password: root
 Database: technical
 ```
 
 ---
 
-# 🧪 8. Common issues
+## 8. Troubleshooting
 
-### ❌ `npm: command not found`
-You are inside Docker.  
-Run frontend commands **only on host**.
+### npm or quasar not found
+Ensure you are running commands on the **host machine**, not inside a Docker container.
 
-### ❌ `cd frontend: No such file`
-You are inside `tech-php`.  
-Run:
+### cd frontend shows "No such file"
+Exit the PHP container:
 
 ```bash
 exit
 ```
 
-### ❌ `SQLSTATE[HY000] [2002] Connection refused`
-You ran artisan on host.  
-Run it **inside tech-php** only.
+### Database connection errors
+Ensure the backend commands are executed inside the PHP container:
 
-### ❌ Frontend not available on port 9000
-Use:
-
-👉 `http://localhost:5173`
+```bash
+docker exec -it tech-php bash
+```
 
 ---
 
-# 🎉 9. Everything is ready!
+## 9. Project structure
 
-You now have a stable environment:
+```
+technical-assessment/
+ ├── backend/         Laravel API
+ ├── frontend/        Quasar frontend
+ ├── docker/          Nginx configuration
+ └── docker-compose.yml
+```
 
-- Laravel backend (Dockerized)  
-- Quasar frontend (local dev server)  
-- MySQL + phpMyAdmin  
-- Fully working migrations (including sessions)  
-- Clear separation of commands host vs container  
+---
+
+## 10. Development URLs
+
+| Component | URL |
+|----------|------|
+| Backend API | http://localhost:8080 |
+| Frontend | http://localhost:5173 |
+| phpMyAdmin | http://localhost:8081 |
 
