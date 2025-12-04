@@ -1,30 +1,19 @@
-# Technical Assessment — Laravel + Quasar + Docker (FINAL v3)
+# Technical Assessment — Laravel + Quasar + Docker  
+## ⭐ FINAL README (Working 100% After Clean Installation)
 
-## 📘 Overview
-
-This documentation provides a clear, step-by-step installation guide  
-for running:
-
-- Laravel 11 (backend)
-- Quasar / Vue 3 (frontend)
-- MySQL 8
-- PHP-FPM 8.4
-- Nginx
-- phpMyAdmin
-- Docker Compose
-
-ALL required migrations (including `sessions`) are included in the repo.
+This guide describes **exactly** how to install and run the project step‑by‑step.  
+Follow it precisely — everything will work on first run.
 
 ---
 
-# 🚀 1. Requirements
+# 📦 1. Requirements
 
-Install on your host machine:
+Install on your **host machine**:
 
-- **Docker** + **Docker Compose**
-- **Node.js ≥ 18**
-- **npm**
-- (optional) **Quasar CLI** — can also use `npx`
+- Docker + Docker Compose  
+- Node.js ≥ 18  
+- npm  
+- (optional) Quasar CLI (not required)
 
 ---
 
@@ -37,7 +26,7 @@ cd technical-assessment
 
 ---
 
-# 🚀 3. Backend Setup (Laravel)
+# 🚀 3. Backend installation (Laravel)
 
 ```bash
 cd backend
@@ -45,15 +34,9 @@ composer install
 cp .env.example .env
 ```
 
-### ✔️ Configure `.env` (already correct in repo)
+Your preconfigured `.env` should already contain:
 
 ```
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost:8080
-
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
@@ -62,17 +45,15 @@ DB_USERNAME=root
 DB_PASSWORD=root
 
 SESSION_DRIVER=database
-SESSION_LIFETIME=120
 ```
 
-Laravel uses MySQL inside Docker.  
-Session storage uses the database.
+All required migrations (including *sessions*) exist in the project.
 
 ---
 
-# 🚀 4. Start Docker (backend + DB + nginx)
+# 🚀 4. Start Docker environment
 
-From the project root:
+From the **root directory**:
 
 ```bash
 cd ..
@@ -80,80 +61,71 @@ docker compose down -v
 docker compose up -d --build
 ```
 
-### Running services:
+### Services now running:
 
-| Container     | Role              | URL                     |
-|---------------|-------------------|--------------------------|
-| tech-php      | Laravel backend   | internal only            |
-| tech-nginx    | Web server        | http://localhost:8080    |
-| tech-mysql    | MySQL 8           | 3307 → 3306              |
-| tech-pma      | phpMyAdmin        | http://localhost:8081    |
+| Service     | URL / Info                  |
+|-------------|------------------------------|
+| Backend API | http://localhost:8080        |
+| phpMyAdmin  | http://localhost:8081        |
+| MySQL       | Port 3307 → 3306 inside      |
 
 ---
 
 # 🚀 5. Run Laravel migrations
 
-Enter PHP container:
+Enter the PHP container:
 
 ```bash
 docker exec -it tech-php bash
 ```
 
-Inside container:
+Inside the container:
 
 ```bash
 php artisan key:generate
 php artisan migrate -v
 ```
 
-ALL tables including **sessions** will be created.
+> ✔ All tables including **sessions** will be created.
 
-### IMPORTANT — leave the container now:
+Now **EXIT the container** — this is important:
 
 ```bash
 exit
 ```
 
-If you don't exit, you will NOT be able to run frontend commands!
-
 ---
 
-# 🚀 6. Frontend Setup (Quasar)
-
-On your **host machine** (NOT inside container):
+# 🚀 6. Frontend installation (Quasar) — run on HOST, not in Docker
 
 ```bash
 cd frontend
 npm install
 ```
 
-### Start dev server (explicit port 9000 to avoid conflicts):
-
-Using local Quasar CLI:
+Run the dev server on the correct port (Vite default):
 
 ```bash
-quasar dev --port 9000 --hostname 0.0.0.0
+npx quasar dev --port 5173 --hostname 0.0.0.0
 ```
 
-If you don't have Quasar CLI installed globally:
+If you have global Quasar CLI:
 
 ```bash
-npx quasar dev --port 9000 --hostname 0.0.0.0
+quasar dev --port 5173 --hostname 0.0.0.0
 ```
 
-👉 Frontend will be available at:
+Frontend is available at:
 
-```
-http://localhost:9000
-```
+👉 **http://localhost:5173/**
 
 ---
 
-# 🚀 7. phpMyAdmin
+# 🌐 7. phpMyAdmin access
 
-```
-http://localhost:8081
-```
+Visit:
+
+👉 http://localhost:8081
 
 Credentials:
 
@@ -166,56 +138,38 @@ Database: technical
 
 ---
 
-# 📄 8. Sessions migration included in repo
+# 🧪 8. Common issues
 
-`backend/database/migrations/2024_01_05_000000_create_sessions_table.php`  
-(Already applied by `php artisan migrate`)
+### ❌ `npm: command not found`
+You are inside Docker.  
+Run frontend commands **only on host**.
 
----
-
-# 🧪 9. Troubleshooting
-
-### ❌ Error: `cd frontend` inside container
-You're still inside tech-php.  
-Solution:
+### ❌ `cd frontend: No such file`
+You are inside `tech-php`.  
+Run:
 
 ```bash
 exit
-cd frontend
 ```
 
-### ❌ Error: `npm: command not found`
-You are still inside Docker.  
-Node is only installed on host.
+### ❌ `SQLSTATE[HY000] [2002] Connection refused`
+You ran artisan on host.  
+Run it **inside tech-php** only.
 
-### ❌ Error: SQLSTATE[HY000] [2002] Connection refused
-You ran Artisan **outside Docker**.  
-Always run inside:
+### ❌ Frontend not available on port 9000
+Use:
 
-```bash
-docker exec -it tech-php bash
-```
-
-### ❌ Sessions table missing
-Not applicable — migration is included.
+👉 `http://localhost:5173`
 
 ---
 
-# 🎉 10. Everything is ready
+# 🎉 9. Everything is ready!
 
-You now have:
+You now have a stable environment:
 
-✔ Fully working backend (Laravel)  
-✔ Fully working frontend (Quasar)  
-✔ Dockerized services  
-✔ No manual migrations needed  
-✔ Clean and consistent installation workflow  
+- Laravel backend (Dockerized)  
+- Quasar frontend (local dev server)  
+- MySQL + phpMyAdmin  
+- Fully working migrations (including sessions)  
+- Clear separation of commands host vs container  
 
-If you'd like:
-
-- a `frontend` service added to docker-compose,  
-- Makefile automation (`make up`, `make migrate`, etc.),  
-- production docker-compose setup,  
-- CI/CD pipeline,  
-
-just tell me!
