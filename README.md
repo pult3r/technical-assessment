@@ -11,6 +11,8 @@ This project contains a complete development environment based on Docker, runnin
 - MySQL 8
 - phpMyAdmin
 
+The backend includes **all required migrations**, including the `sessions` table.
+
 ---
 
 ## 📦 Project Structure
@@ -18,6 +20,13 @@ This project contains a complete development environment based on Docker, runnin
 ```
 technical-assessment/
  ├── backend/       → Laravel API
+ │    └── database/migrations/
+ │         ├── 0001_01_01_000000_create_users_table.php
+ │         ├── 2024_01_02_000000_create_audit_log_table.php
+ │         ├── 2024_01_03_000001_create_users_triggers.php
+ │         ├── 2024_01_04_000000_create_pdf_logs_table.php
+ │         ├── 2024_01_04_000001_create_pdf_logs_trigger.php
+ │         └── 2024_01_05_000000_create_sessions_table.php   ← NEW (included in repo)
  ├── frontend/      → Quasar SPA
  ├── docker/        → Docker config files
  └── docker-compose.yml
@@ -25,7 +34,7 @@ technical-assessment/
 
 ---
 
-## 🚀 1. Clone and Setup
+# 🚀 1. Clone and Setup
 
 ```bash
 git clone https://github.com/pult3r/technical-assessment.git
@@ -34,9 +43,7 @@ cd technical-assessment
 
 ---
 
-## 🚀 2. Backend Setup (Laravel)
-
-### Install dependencies:
+# 🚀 2. Backend Setup (Laravel)
 
 ```bash
 cd backend
@@ -44,7 +51,7 @@ composer install
 cp .env.example .env
 ```
 
-### Set correct DB configuration in `.env`:
+### `.env` contains correct DB configuration:
 
 ```
 DB_CONNECTION=mysql
@@ -59,7 +66,7 @@ SESSION_DRIVER=database
 
 ---
 
-## 🚀 3. Docker Setup
+# 🚀 3. Docker Setup
 
 From project root:
 
@@ -80,7 +87,7 @@ docker compose up -d --build
 
 ---
 
-## 🚀 4. Laravel Commands
+# 🚀 4. Laravel Commands
 
 Enter PHP container:
 
@@ -94,22 +101,26 @@ docker exec -it tech-php bash
 php artisan key:generate
 ```
 
-### Run migrations:
+### Run migrations (sessions table included automatically):
 
 ```bash
-php artisan migrate
+php artisan migrate -v
 ```
 
-If sessions table is missing:
+After executing this, all tables including:
 
-```bash
-php artisan make:migration create_sessions_table
-php artisan migrate
-```
+- users  
+- audit_log  
+- pdf_logs  
+- sessions  
+
+will be created.
+
+No manual migration creation is required.
 
 ---
 
-## 🚀 5. phpMyAdmin
+# 🚀 5. phpMyAdmin
 
 ```
 http://localhost:8081
@@ -126,7 +137,7 @@ DB: technical
 
 ---
 
-## 🚀 6. Frontend (Quasar)
+# 🚀 6. Frontend (Quasar)
 
 ```bash
 cd frontend
@@ -136,12 +147,13 @@ quasar dev
 
 ---
 
-## 🧪 7. Common Issues
+# 🧪 7. Common Issues
 
 ### ❌ `SQLSTATE[HY000] [2002] Connection refused`
 
-You ran artisan **outside** Docker.  
-Use:
+This occurs only when artisan is run outside Docker.
+
+Run it inside:
 
 ```bash
 docker exec -it tech-php bash
@@ -149,16 +161,12 @@ docker exec -it tech-php bash
 
 ### ❌ `Table 'technical.sessions' doesn't exist`
 
-Create migration manually:
-
-```bash
-php artisan make:migration create_sessions_table
-php artisan migrate
-```
+Not applicable anymore —  
+the migration **is included in the repo** and runs automatically.
 
 ---
 
-## 🛠 8. Recommended Adjustments
+# 🛠 8. Recommended Adjustments
 
 ### Add MySQL user in docker-compose:
 
@@ -170,18 +178,15 @@ environment:
   MYSQL_PASSWORD: secret
 ```
 
-And update `.env`:
+Then set in `.env`:
 
 ```
 DB_USERNAME=app
 DB_PASSWORD=secret
 ```
 
-### Add sessions migration to the repo for all developers.
-
 ---
 
-## 🎉 Finished!
+# 🎉 Finished!
 
-Your environment should now run flawlessly.
-
+Your environment should now run flawlessly with **NO manual session migration creation required**.
