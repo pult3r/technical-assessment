@@ -2,14 +2,12 @@
 
 This guide describes the installation and setup process for the project, including:
 
-- Laravel backend
-- Quasar frontend
-- MySQL database
-- Nginx
-- phpMyAdmin
-- Docker Compose
-
-Follow each step to configure the environment properly.
+- Laravel backend  
+- Quasar frontend  
+- MySQL database  
+- Nginx  
+- phpMyAdmin  
+- Docker Compose  
 
 ---
 
@@ -60,7 +58,6 @@ SESSION_DRIVER=database
 From the project root:
 
 ```bash
-cd ..
 docker compose down -v
 docker compose up -d --build
 ```
@@ -88,6 +85,21 @@ Inside the container:
 ```bash
 php artisan key:generate
 php artisan migrate -v
+```
+
+### 5.1 Create storage symlink (required for PDF access)
+
+Laravel stores generated PDFs inside `storage/app/public`.  
+To make them accessible via URL, create the public symlink:
+
+```bash
+php artisan storage:link
+```
+
+You should see:
+
+```
+The [public/storage] directory has been linked.
 ```
 
 Then exit:
@@ -159,6 +171,13 @@ Ensure the backend commands are executed inside the PHP container:
 docker exec -it tech-php bash
 ```
 
+### PDF returns 403 Forbidden
+This means the storage symlink is missing. Run:
+
+```bash
+php artisan storage:link
+```
+
 ---
 
 ## 9. Project structure
@@ -180,4 +199,3 @@ technical-assessment/
 | Backend API | http://localhost:8080 |
 | Frontend | http://localhost:5173 |
 | phpMyAdmin | http://localhost:8081 |
-

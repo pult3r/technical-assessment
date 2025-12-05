@@ -39,7 +39,6 @@ echo "----------------------------------------------"
 
 if [ ! -d "backend" ]; then
     echo "❌ ERROR: Folder 'backend' not found!"
-    echo "Musisz uruchomić ten skrypt z katalogu technical-assessment/"
     exit 1
 fi
 
@@ -99,7 +98,7 @@ done
 echo "✔ MySQL is ready!"
 
 # -----------------------------------------------
-# 4. Laravel migrate
+# 4. RUN MIGRATIONS
 # -----------------------------------------------
 
 echo "----------------------------------------------"
@@ -110,9 +109,25 @@ docker exec -it $PHP_CONTAINER php artisan key:generate
 docker exec -it $PHP_CONTAINER php artisan migrate -v
 
 # -----------------------------------------------
-# 5. Frontend setup
+# 5. STORAGE SYMLINK + FIX PERMISSIONS
 # -----------------------------------------------
 
+echo "----------------------------------------------"
+echo " CREATING STORAGE SYMLINK AND FIXING PERMISSIONS"
+echo "----------------------------------------------"
+
+docker exec -it $PHP_CONTAINER php artisan storage:link || true
+
+docker exec -it $PHP_CONTAINER bash -c "
+    chmod -R 775 storage bootstrap/cache
+    chown -R www-data:www-data storage bootstrap/cache
+"
+
+echo "✔ Storage symlink created and permissions fixed."
+
+# -----------------------------------------------
+# 6. Frontend setup (Quasar)
+# -----------------------------------------------
 echo "----------------------------------------------"
 echo " INSTALLING FRONTEND"
 echo "----------------------------------------------"
@@ -134,7 +149,7 @@ if lsof -i :5173 >/dev/null 2>&1; then
     echo "✔ Frontend already running on http://localhost:5173"
 else
     echo "👉 Starting Quasar Dev Server in background..."
-    (npx quasar dev --port 5173 --hostname 0.0.0.0 >/dev/null 2>&1 &) 
+    (npx quasar dev --port 5173 --hostname 0.0.0.0 >/dev/null 2>&1 &)
     echo "✔ Frontend started on http://localhost:5173"
 fi
 
