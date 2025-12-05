@@ -76,17 +76,37 @@ echo "----------------------------------------------"
 docker compose down -v || true
 docker compose up -d --build
 
-echo "⏳ Waiting for containers to start..."
-sleep 5
+echo "🚀 Docker started."
 
 # -----------------------------------------------
-# 4. Run Laravel commands in PHP container
+# 4. WAIT FOR MYSQL TO BECOME READY
+# -----------------------------------------------
+PHP_CONTAINER="tech-php"
+
+echo "----------------------------------------------"
+echo " WAITING FOR MYSQL TO BE READY..."
+echo "----------------------------------------------"
+
+until docker exec $PHP_CONTAINER php -r "
+try {
+    new PDO('mysql:host=mysql;port=3306;dbname=technical','root','root');
+    echo 'MySQL OK';
+} catch (Exception \$e) {
+    exit(1);
+}
+"; do
+    echo "⏳ MySQL not ready yet... retrying in 2 seconds"
+    sleep 2
+done
+
+echo "✔ MySQL is ready!"
+
+# -----------------------------------------------
+# 5. Run Laravel commands in PHP container
 # -----------------------------------------------
 echo "----------------------------------------------"
 echo " RUNNING LARAVEL MIGRATIONS"
 echo "----------------------------------------------"
-
-PHP_CONTAINER="tech-php"
 
 echo "👉 Generating APP_KEY..."
 docker exec -it $PHP_CONTAINER php artisan key:generate
@@ -95,7 +115,7 @@ echo "👉 Running migrations..."
 docker exec -it $PHP_CONTAINER php artisan migrate -v
 
 # -----------------------------------------------
-# 5. Frontend setup (Quasar)
+# 6. Frontend setup (Quasar)
 # -----------------------------------------------
 echo "----------------------------------------------"
 echo " INSTALLING FRONTEND"
@@ -123,6 +143,6 @@ echo "=============================================="
 echo "🎉 PROJECT SETUP COMPLETE!"
 echo ""
 echo " Backend:     http://localhost:8080"
-echo " Frontend:    http://localhost:5173 (start manually)"
+echo " Frontend:    http://localhost:5173 (manual start)"
 echo " phpMyAdmin:  http://localhost:8081"
 echo "=============================================="
