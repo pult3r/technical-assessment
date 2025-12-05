@@ -30,23 +30,18 @@ echo " TECHNICAL ASSESSMENT – FULL PROJECT SETUP"
 echo "=============================================="
 
 # -----------------------------------------------
-# 1. Clone repository
+# 1. Backend setup (Laravel)
 # -----------------------------------------------
-if [ ! -d "technical-assessment" ]; then
-    echo "👉 Cloning repository..."
-    git clone https://github.com/pult3r/technical-assessment.git
-else
-    echo "✔ Repository already exists, skipping clone."
-fi
 
-cd technical-assessment
-
-# -----------------------------------------------
-# 2. Backend setup (Laravel)
-# -----------------------------------------------
 echo "----------------------------------------------"
 echo " INSTALLING BACKEND"
 echo "----------------------------------------------"
+
+if [ ! -d "backend" ]; then
+    echo "❌ ERROR: Folder 'backend' not found!"
+    echo "Musisz uruchomić ten skrypt z katalogu technical-assessment/"
+    exit 1
+fi
 
 cd backend
 
@@ -67,8 +62,9 @@ fi
 cd ..
 
 # -----------------------------------------------
-# 3. Start Docker environment
+# 2. Start Docker environment
 # -----------------------------------------------
+
 echo "----------------------------------------------"
 echo " STARTING DOCKER ENVIRONMENT"
 echo "----------------------------------------------"
@@ -79,8 +75,9 @@ docker compose up -d --build
 echo "🚀 Docker started."
 
 # -----------------------------------------------
-# 4. WAIT FOR MYSQL TO BECOME READY
+# 3. WAIT FOR MYSQL
 # -----------------------------------------------
+
 PHP_CONTAINER="tech-php"
 
 echo "----------------------------------------------"
@@ -102,21 +99,20 @@ done
 echo "✔ MySQL is ready!"
 
 # -----------------------------------------------
-# 5. Run Laravel commands in PHP container
+# 4. Laravel migrate
 # -----------------------------------------------
+
 echo "----------------------------------------------"
 echo " RUNNING LARAVEL MIGRATIONS"
 echo "----------------------------------------------"
 
-echo "👉 Generating APP_KEY..."
 docker exec -it $PHP_CONTAINER php artisan key:generate
-
-echo "👉 Running migrations..."
 docker exec -it $PHP_CONTAINER php artisan migrate -v
 
 # -----------------------------------------------
-# 6. Frontend setup (Quasar)
+# 5. Frontend setup
 # -----------------------------------------------
+
 echo "----------------------------------------------"
 echo " INSTALLING FRONTEND"
 echo "----------------------------------------------"
@@ -130,14 +126,10 @@ else
     echo "✔ Frontend dependencies already installed."
 fi
 
-# -----------------------------------------------
-# 7. AUTO-START FRONTEND (background)
-# -----------------------------------------------
 echo "----------------------------------------------"
 echo " STARTING FRONTEND (Quasar Dev Server)"
 echo "----------------------------------------------"
 
-# Check if port 5173 already used
 if lsof -i :5173 >/dev/null 2>&1; then
     echo "✔ Frontend already running on http://localhost:5173"
 else
@@ -151,6 +143,7 @@ cd ..
 # -----------------------------------------------
 # DONE
 # -----------------------------------------------
+
 echo ""
 echo "=============================================="
 echo "🎉 PROJECT SETUP COMPLETE!"
