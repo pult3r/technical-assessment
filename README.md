@@ -1,10 +1,10 @@
 # Technical Assessment — Laravel + Quasar + Docker
 
-This guide describes the installation and setup process for the project, including:
+This document describes how to install and run the project environment, including:
 
 - Laravel backend  
 - Quasar frontend  
-- MySQL database  
+- MySQL  
 - Nginx  
 - phpMyAdmin  
 - Docker Compose  
@@ -15,8 +15,8 @@ This guide describes the installation and setup process for the project, includi
 
 Install on your host machine:
 
-- Docker + Docker Compose  
-- Node.js ≥ 18  
+- Docker & Docker Compose  
+- Node.js 18+  
 - npm  
 
 ---
@@ -26,6 +26,16 @@ Install on your host machine:
 ```bash
 git clone https://github.com/pult3r/technical-assessment.git
 cd technical-assessment
+```
+
+Project structure:
+
+```
+technical-assessment/
+ ├── backend/      
+ ├── frontend/     
+ ├── docker/       
+ └── docker-compose.yml
 ```
 
 ---
@@ -38,7 +48,7 @@ composer install
 cp .env.example .env
 ```
 
-The `.env` file included is already configured for Docker (adjust if needed):
+Default `.env` is configured for Docker:
 
 ```
 DB_CONNECTION=mysql
@@ -47,19 +57,17 @@ DB_PORT=3306
 DB_DATABASE=technical
 DB_USERNAME=root
 DB_PASSWORD=root
-
 SESSION_DRIVER=database
 ```
-
-If you need to change JWT secret or other values, edit `backend/.env` before starting containers.
 
 ---
 
 ## 4. Start Docker environment
 
-From the project root:
+Run from the project root:
 
 ```bash
+cd ..
 docker compose down -v
 docker compose up -d --build
 ```
@@ -121,47 +129,39 @@ exit
 
 ## 6. Frontend setup (Quasar)
 
-All frontend commands must be run on the **host**, not inside Docker.
-
-From project root:
+Run on host machine:
 
 ```bash
 cd frontend
 npm install
 ```
 
-Start the development server (host machine):
+Start dev server:
 
 ```bash
 npx quasar dev --port 5173 --hostname 0.0.0.0
 ```
 
-Frontend is available at:
+Frontend URL:
 
 ```
 http://localhost:5173
-```
-
-If you prefer to run Quasar in background (non-blocking):
-
-```bash
-(npx quasar dev --port 5173 --hostname 0.0.0.0 &)
 ```
 
 ---
 
 ## 7. phpMyAdmin
 
-Access via browser:
+URL:
 
 ```
 http://localhost:8081
 ```
 
-Database login:
+Credentials:
 
 ```
-Host: mysql
+Server: mysql
 User: root
 Password: root
 Database: technical
@@ -172,36 +172,41 @@ Database: technical
 ## 8. Troubleshooting
 
 ### npm or quasar not found
-Ensure you are running commands on the **host machine**, not inside a Docker container.
+Make sure commands are executed on the host machine, not inside Docker.
 
-### cd frontend shows "No such file"
-Exit the PHP container:
+### "cd frontend" shows "No such file"
+You are inside the PHP container. Exit it:
 
 ```bash
 exit
 ```
 
-### Database connection errors (migrations)
-If migrations fail with "Connection refused", MySQL might not be ready. Retry from host:
+### Database connection errors ("Connection refused")
+MySQL may not be ready.
 
 ```bash
 docker compose up -d --build
-# wait a few seconds or check logs
 docker compose logs -f mysql
 ```
 
-Or run migrations inside PHP container after confirming MySQL up:
+Then retry migrations:
 
 ```bash
 docker exec -it tech-php bash
 php artisan migrate -v
 ```
 
-### Storage / PDF returns 403 Forbidden
-If generated PDF returns 403 when opening returned `storage/...` URL, likely causes:
+### PDF or storage URL returns 403
+Possible causes:
 
-- `public/storage` symlink missing → run `php artisan storage:link`
-- filesystem permissions prevent nginx from reading files → run inside PHP container:
+- Missing symlink → run:
+
+  ```bash
+  php artisan storage:link
+  ```
+
+- File permissions → run inside container:
+
   ```bash
   chmod -R 775 storage bootstrap/cache
   chown -R www-data:www-data storage bootstrap/cache
@@ -218,22 +223,25 @@ If generated PDF returns 403 when opening returned `storage/...` URL, likely cau
 
 ## 9. Helpful commands (summary)
 
-From project root:
+### Docker
 
 ```bash
-# rebuild and start
 docker compose down -v
 docker compose up -d --build
-
-# enter PHP container
 docker exec -it tech-php bash
+```
 
-# inside php container
+### Laravel (inside container)
+
+```bash
 php artisan key:generate
 php artisan migrate -v
 php artisan storage:link
+```
 
-# frontend (on host)
+### Frontend (host machine)
+
+```bash
 cd frontend
 npm install
 npx quasar dev --port 5173 --hostname 0.0.0.0
