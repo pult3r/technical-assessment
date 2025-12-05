@@ -130,8 +130,21 @@ else
     echo "✔ Frontend dependencies already installed."
 fi
 
-echo "🎉 Frontend can be started manually with:"
-echo "   npx quasar dev --port 5173 --hostname 0.0.0.0"
+# -----------------------------------------------
+# 7. AUTO-START FRONTEND (background)
+# -----------------------------------------------
+echo "----------------------------------------------"
+echo " STARTING FRONTEND (Quasar Dev Server)"
+echo "----------------------------------------------"
+
+# Check if port 5173 already used
+if lsof -i :5173 >/dev/null 2>&1; then
+    echo "✔ Frontend already running on http://localhost:5173"
+else
+    echo "👉 Starting Quasar Dev Server in background..."
+    (npx quasar dev --port 5173 --hostname 0.0.0.0 >/dev/null 2>&1 &) 
+    echo "✔ Frontend started on http://localhost:5173"
+fi
 
 cd ..
 
@@ -143,6 +156,6 @@ echo "=============================================="
 echo "🎉 PROJECT SETUP COMPLETE!"
 echo ""
 echo " Backend:     http://localhost:8080"
-echo " Frontend:    http://localhost:5173 (manual start)"
+echo " Frontend:    http://localhost:5173 (auto-started)"
 echo " phpMyAdmin:  http://localhost:8081"
 echo "=============================================="
