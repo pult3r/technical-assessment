@@ -1,21 +1,18 @@
-import axios from 'axios'
-
-const API_URL = 'https://api.student-cribs.com/api/cleaning'
-const STATIC_AUTH =
-  'e0df1c3052807c51d3c3b146ec51d3c3b146e18418447f37a7e035fe0df1c305280747f37a7e035f'
+import api from 'src/services/api/base'
+import { API_CONFIG } from 'src/services/api/config'
 
 export default {
   async fetchSteps({ authToken, username, propertyId }) {
-    const response = await axios.post(
-      `${API_URL}/steps`,
+    const response = await api.post(
+      '/cleaning/steps',
       {
         auth_token: authToken,
-        username: username,
+        username,
         property_id: propertyId
       },
       {
         params: {
-          auth: STATIC_AUTH
+          auth: API_CONFIG.STATIC_AUTH
         }
       }
     )

@@ -2,12 +2,15 @@ import api from 'src/services/api/base'
 import { API_CONFIG } from 'src/services/api/config'
 
 export default {
-  async login(username, password) {
-    const response = await api.post(
-      '/cleaning/login',
+  submitAnswer({ authToken, username, propertyId, stepId, answer }) {
+    return api.post(
+      '/cleaning/answer',
       {
+        auth_token: authToken,
         username,
-        password
+        property_id: propertyId,
+        step_id: stepId,
+        answer
       },
       {
         params: {
@@ -15,7 +18,5 @@ export default {
         }
       }
     )
-
-    return response.data
   }
 }
