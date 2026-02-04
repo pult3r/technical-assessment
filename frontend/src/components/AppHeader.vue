@@ -3,11 +3,9 @@
     <q-toolbar>
 
       <q-toolbar-title>
-        <!-- The title is intentionally generic - it can be replaced with logo or app name -->
-        {{ t('generator.title') }}
+        {{ $t('app.title') }}
       </q-toolbar-title>
 
-      <!-- LANGUAGE SELECTOR -->
       <q-select
         v-model="currentLocale"
         :options="locales"
@@ -15,62 +13,52 @@
         borderless
         emit-value
         map-options
-        style="width: 90px; margin-right: 20px"
+        style="width: 110px; margin-right: 16px"
         @update:model-value="changeLanguage"
       />
 
-      <!-- LOGOUT -->
       <q-btn
         flat
         dense
         color="white"
         icon="logout"
-        :label="t('common.logout')"
+        :label="$t('common.logout')"
         @click="logout"
       />
     </q-toolbar>
   </q-header>
 </template>
 
-<script setup>
-/**
- * AppHeader.vue
- * Encapsulates the top toolbar: app title, language selector and logout button.
- * Comments and code are in English.
- */
+<script>
+import { useSessionStore } from 'src/stores/session'
+import { i18n } from 'src/boot/i18n'
 
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from 'src/stores/auth';
+export default {
+  name: 'AppHeader',
 
-const { t, locale } = useI18n();
-const router = useRouter();
-const auth = useAuthStore();
+  data() {
+    return {
+      currentLocale: localStorage.getItem('locale') || 'en',
+      locales: [
+        { label: 'EN', value: 'en' },
+        { label: 'PL', value: 'pl' },
+        { label: 'ES', value: 'es' },
+        { label: 'PT', value: 'pt' }
+      ]
+    }
+  },
 
-/**
- * Supported languages
- */
-const locales = [
-  { label: 'PL', value: 'pl' },
-  { label: 'EN', value: 'en' }
-];
+  methods: {
+    changeLanguage(lang) {
+      i18n.global.locale.value = lang
+      localStorage.setItem('locale', lang)
+    },
 
-const currentLocale = ref(localStorage.getItem('locale') || locale.value || 'pl');
-
-/**
- * Change language - updates i18n locale and stores preference to localStorage.
- */
-const changeLanguage = (lang) => {
-  locale.value = lang;
-  localStorage.setItem('locale', lang);
-};
-
-/**
- * Logout - delegates to auth store and redirects to login.
- */
-const logout = () => {
-  auth.logout();
-  router.push('/');
-};
+    logout() {
+      const session = useSessionStore()
+      session.clearSession()
+      this.$router.push('/')
+    }
+  }
+}
 </script>

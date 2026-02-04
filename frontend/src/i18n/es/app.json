@@ -1,0 +1,44 @@
+{
+  "login": {
+    "title": "Iniciar sesión",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "button": "Iniciar sesión",
+    "go_register": "Crear cuenta",
+    "error": "Nombre de usuario o contraseña incorrectos.",
+    "validation_required": "Todos los campos son obligatorios."
+  },
+  "register": {
+    "title": "Registro",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "button": "Crear cuenta",
+    "go_login": "¿Ya tienes una cuenta? Inicia sesión",
+    "error": "No se pudo crear la cuenta.",
+    "validation_username": "El nombre de usuario debe tener al menos 3 caracteres.",
+    "validation_email": "Formato de correo electrónico no válido.",
+    "validation_password": "La contraseña debe tener al menos 6 caracteres.",
+    "validation_required": "Todos los campos son obligatorios."
+  },
+  "common": {
+    "logout": "Cerrar sesión",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "app": {
+    "title": "Aplicación de limpieza",
+    "logged_as": "Conectado como",
+    "loading": "Cargando apartamentos…",
+    "error": "No se pudieron cargar los datos.",
+    "filters": {
+      "city": "Filtrar por ciudad",
+      "address": "Filtrar por dirección"
+    },
+    "stats": {
+      "cities": "Ciudades",
+      "properties": "Apartamentos"
+    },
+    "session_started": "Sesión iniciada"
+  }
+}

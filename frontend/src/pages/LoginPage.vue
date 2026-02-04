@@ -2,14 +2,24 @@
   <q-page class="q-pa-md flex flex-center">
     <q-card class="q-pa-lg" style="width:420px;max-width:90%;">
       <q-card-section>
-        <div class="text-h6">{{ t('login.title') }}</div>
+        <div class="text-h6">{{ $t('login.title') }}</div>
       </q-card-section>
 
       <q-form @submit.prevent="submit">
         <q-card-section>
-          <q-input filled v-model="username" :label="t('login.username')" />
-          <q-input filled v-model="password" type="password" class="q-mt-md"
-                   :label="t('login.password')" />
+          <q-input
+            filled
+            v-model="username"
+            :label="$t('login.username')"
+          />
+
+          <q-input
+            filled
+            v-model="password"
+            type="password"
+            class="q-mt-md"
+            :label="$t('login.password')"
+          />
         </q-card-section>
 
         <q-card-section v-if="error" class="text-negative">
@@ -17,52 +27,75 @@
         </q-card-section>
 
         <q-card-actions align="between">
-          <q-btn type="submit" color="primary" :label="t('login.button')" />
+          <q-btn
+            type="submit"
+            color="primary"
+            :label="$t('login.button')"
+            :loading="loading"
+          />
 
-          <q-btn flat color="secondary" :label="t('login.go_register')"
-                 @click="router.push('/register')" />
+          <q-btn
+            flat
+            color="secondary"
+            :label="$t('login.go_register')"
+            @click="$router.push('/register')"
+          />
         </q-card-actions>
       </q-form>
     </q-card>
   </q-page>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { api } from 'src/boot/axios';
-import { useAuthStore } from 'src/stores/auth';
-import { useRouter } from 'vue-router';
+<script>
+import authApi from 'src/services/api/cleaning/auth'
+import { useSessionStore } from 'src/stores/session'
 
-const username = ref('');
-const password = ref('');
-const error = ref(false);
-const errorMessage = ref('');
+export default {
+  name: 'LoginPage',
 
-const { t } = useI18n();
-const router = useRouter();
-const auth = useAuthStore();
+  data() {
+    return {
+      username: '',
+      password: '',
+      loading: false,
+      error: false,
+      errorMessage: ''
+    }
+  },
 
-const submit = async () => {
-  error.value = false;
+  methods: {
+    async submit() {
+      this.error = false
 
-  if (!username.value || !password.value) {
-    error.value = true;
-    errorMessage.value = t('login.validation_required');
-    return;
+      if (!this.username || !this.password) {
+        this.error = true
+        this.errorMessage = this.$t('login.validation_required')
+        return
+      }
+
+      this.loading = true
+
+      try {
+        const response = await authApi.login(this.username, this.password)
+
+        const sessionStore = useSessionStore()
+
+        sessionStore.setSession({
+          authToken: response.auth_token,
+          userId: response.data.id,
+          username: this.username
+        })
+
+        // ✅ REDIRECT AFTER SUCCESSFUL LOGIN
+        this.$router.push('/app')
+
+      } catch {
+        this.error = true
+        this.errorMessage = this.$t('login.error')
+      } finally {
+        this.loading = false
+      }
+    }
   }
-
-  try {
-    const res = await api.post('/login', {
-      username: username.value,
-      password: password.value
-    });
-
-    auth.setToken(res.data.token);
-    router.push('/generator');
-  } catch {
-    error.value = true;
-    errorMessage.value = t('login.error');
-  }
-};
+}
 </script>

@@ -1,0 +1,44 @@
+{
+  "login": {
+    "title": "Logowanie",
+    "username": "Nazwa użytkownika",
+    "password": "Hasło",
+    "button": "Zaloguj",
+    "go_register": "Utwórz konto",
+    "error": "Nieprawidłowy login lub hasło.",
+    "validation_required": "Wszystkie pola są wymagane."
+  },
+  "register": {
+    "title": "Rejestracja",
+    "username": "Nazwa użytkownika",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "button": "Zarejestruj",
+    "go_login": "Masz już konto? Zaloguj się",
+    "error": "Nie udało się utworzyć konta.",
+    "validation_username": "Nazwa użytkownika musi mieć co najmniej 3 znaki.",
+    "validation_email": "Nieprawidłowy adres e-mail.",
+    "validation_password": "Hasło musi mieć co najmniej 6 znaków.",
+    "validation_required": "Wszystkie pola są wymagane."
+  },
+  "common": {
+    "logout": "Wyloguj",
+    "yes": "Tak",
+    "no": "Nie"
+  },
+  "app": {
+    "title": "Aplikacja sprzątania",
+    "logged_as": "Zalogowany jako",
+    "loading": "Ładowanie mieszkań…",
+    "error": "Nie udało się pobrać danych.",
+    "filters": {
+      "city": "Filtruj po mieście",
+      "address": "Filtruj po adresie"
+    },
+    "stats": {
+      "cities": "Miasta",
+      "properties": "Mieszkania"
+    },
+    "session_started": "Sesja rozpoczęta"
+  }
+}

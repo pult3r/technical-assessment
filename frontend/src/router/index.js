@@ -1,65 +1,58 @@
-// src/router/index.js
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { useSessionStore } from 'src/stores/session'
 
-import LoginPage from 'src/pages/LoginPage.vue';
-import RegisterPage from 'src/pages/RegisterPage.vue';
-import GeneratePdfPage from 'src/pages/GeneratePdfPage.vue';
-import MainLayout from 'src/layouts/MainLayout.vue';
-
-import { useAuthStore } from 'src/stores/auth';
+import LoginPage from 'src/pages/LoginPage.vue'
+import RegisterPage from 'src/pages/RegisterPage.vue'
+import AppHomePage from 'src/pages/AppHomePage.vue'
+import PropertyDetailsPage from 'src/pages/PropertyDetailsPage.vue'
 
 const routes = [
-  // --- LOGIN ---
   {
     path: '/',
     name: 'login',
-    component: LoginPage
+    component: LoginPage,
+    meta: { public: true }
   },
-
-  // --- REGISTER ---
   {
     path: '/register',
     name: 'register',
-    component: RegisterPage
+    component: RegisterPage,
+    meta: { public: true }
   },
-
-  // --- PROTECTED AREA ---
   {
-    path: '/generator',
-    component: MainLayout,
-    children: [
-      {
-        path: '',
-        name: 'generator',
-        component: GeneratePdfPage,
-        meta: { requiresAuth: true }
-      }
-    ]
+    path: '/app',
+    name: 'app',
+    component: AppHomePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/app/property/:propertyId',
+    name: 'property-details',
+    component: PropertyDetailsPage,
+    meta: { requiresAuth: true }
   }
-];
+]
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes
-});
+})
 
-// ---------------------------------------------------
+// -------------------------------
 // GLOBAL AUTH GUARD
-// ---------------------------------------------------
+// -------------------------------
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();
+  const sessionStore = useSessionStore()
 
-  // 1. Jeśli wymaga autoryzacji, a user nie jest zalogowany → redirect
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next('/');
+  if (to.meta.requiresAuth && !sessionStore.isAuthenticated) {
+    return next({ name: 'login' })
   }
 
-  // 2. Jeśli user jest zalogowany i wchodzi na "/" → redirect do generatora
-  if (to.path === '/' && auth.isAuthenticated) {
-    return next('/generator');
+  if (to.meta.public && sessionStore.isAuthenticated) {
+    return next({ name: 'app' })
   }
 
-  next();
-});
+  next()
+})
 
-export default router;
+export default router

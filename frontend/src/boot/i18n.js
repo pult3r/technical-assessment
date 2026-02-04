@@ -1,19 +1,18 @@
-// src/boot/i18n.js
-import { boot } from 'quasar/wrappers';
-import { createI18n } from 'vue-i18n';
+import { boot } from 'quasar/wrappers'
+import { createI18n } from 'vue-i18n'
 
-import en from 'src/i18n/en.json';
-import pl from 'src/i18n/pl.json';
+import en from 'src/i18n/en/app.json'
+import pl from 'src/i18n/pl/app.json'
+import es from 'src/i18n/es/app.json'
+import pt from 'src/i18n/pt/app.json'
 
-const i18n = createI18n({
+export const i18n = createI18n({
   legacy: false,
-  locale: localStorage.getItem('locale') || 'pl',
+  locale: localStorage.getItem('locale') || 'en',
   fallbackLocale: 'en',
-  messages: { en, pl }
-});
+  messages: { en, pl, es, pt }
+})
 
 export default boot(({ app }) => {
-  app.use(i18n);
-});
-
-export { i18n };
+  app.use(i18n)
+})
