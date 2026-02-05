@@ -50,6 +50,23 @@
       "not_started": "Não iniciado",
       "in_progress": "Em progresso",
       "completed": "Concluído"
+    },
+    "session": {
+      "not_started": "Não iniciado",
+      "in_progress": "Limpeza em andamento"
+    },
+    "reclean": {
+      "required": "Re-limpeza necessária",
+      "in_progress": "Re-limpeza em andamento",
+      "resolved": "Re-limpeza concluída",
+      "required_desc": "Alguns itens foram marcados para re-limpeza após a verificação.",
+      "in_progress_desc": "Todos os itens foram corrigidos. Aguardando verificação.",
+      "resolved_desc": "A re-limpeza foi concluída com sucesso."
+    },
+    "summary": {
+      "completed": "Concluído",
+      "pending": "Pendente",
+      "reclean": "Re-limpeza"
     }
   }
 }

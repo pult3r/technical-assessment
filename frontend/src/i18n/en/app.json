@@ -50,6 +50,23 @@
       "not_started": "Not started",
       "in_progress": "In progress",
       "completed": "Completed"
+    },
+    "session": {
+      "not_started": "Not started",
+      "in_progress": "Cleaning in progress"
+    },
+    "reclean": {
+      "required": "Re-clean required",
+      "in_progress": "Re-clean in progress",
+      "resolved": "Re-clean resolved",
+      "required_desc": "Some items were marked for re-clean after verification.",
+      "in_progress_desc": "All required items were corrected. Waiting for verification.",
+      "resolved_desc": "Re-clean has been successfully completed."
+    },
+    "summary": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "reclean": "Re-clean"
     }
   }
 }

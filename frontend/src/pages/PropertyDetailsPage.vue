@@ -40,29 +40,42 @@
         />
       </div>
 
-      <!-- 🟢 STATUS + RE-CLEAN BADGE -->
-      <div class="q-mb-lg row items-center q-col-gutter-sm">
-        <div class="col-auto">
-          <q-chip
-            :color="statusColor"
-            text-color="white"
-            icon="home"
-          >
-            {{ $t(statusLabel) }}
-          </q-chip>
+      <!-- 🧾 CLEANING SUMMARY -->
+      <div class="row q-col-gutter-sm q-mb-lg">
+        <div class="col-4">
+          <q-card flat bordered class="q-pa-sm text-center">
+            <div class="text-caption">
+              {{ $t('property.summary.completed') }}
+            </div>
+            <div class="text-h6">
+              {{ summaryCompleted }}
+            </div>
+          </q-card>
+        </div>
+
+        <div class="col-4">
+          <q-card flat bordered class="q-pa-sm text-center">
+            <div class="text-caption">
+              {{ $t('property.summary.pending') }}
+            </div>
+            <div class="text-h6">
+              {{ summaryPending }}
+            </div>
+          </q-card>
         </div>
 
         <div
-          v-if="recleanCount > 0"
-          class="col-auto"
+          v-if="summaryReclean > 0"
+          class="col-4"
         >
-          <q-chip
-            color="orange-2"
-            text-color="orange-9"
-            icon="warning"
-          >
-            {{ recleanCount }} {{ $t('property.needs_reclean') }}
-          </q-chip>
+          <q-card flat bordered class="q-pa-sm text-center">
+            <div class="text-caption">
+              {{ $t('property.summary.reclean') }}
+            </div>
+            <div class="text-h6 text-orange">
+              {{ summaryReclean }}
+            </div>
+          </q-card>
         </div>
       </div>
 
@@ -73,7 +86,7 @@
         class="q-mb-lg"
       >
         <q-expansion-item
-          :default-opened="group.expand === '1'"
+          :default-opened="group.id === autoExpandGroupId"
           expand-separator
           expand-icon="none"
         >
@@ -168,7 +181,8 @@ export default {
       error: false,
       property: null,
       groups: [],
-      todos: []
+      todos: [],
+      autoExpandGroupId: null
     }
   },
 
@@ -198,28 +212,17 @@ export default {
       return this.completedTotal / this.totalTodos
     },
 
-    // 🔹 STATUS
-    statusLabel() {
-      if (this.completedTotal === 0) {
-        return 'property.status.not_started'
-      }
-      if (this.completedTotal < this.totalTodos) {
-        return 'property.status.in_progress'
-      }
-      return 'property.status.completed'
+    /* SUMMARY */
+    summaryCompleted() {
+      return this.todos.filter(this.isTodoCompleted).length
     },
 
-    statusColor() {
-      if (this.completedTotal === 0) return 'grey'
-      if (this.completedTotal < this.totalTodos) return 'orange'
-      return 'green'
+    summaryPending() {
+      return this.todos.filter(t => t.answer !== '1').length
     },
 
-    // 🟠 RE-CLEAN COUNTER
-    recleanCount() {
-      return this.todos.filter(
-        t => t.reclean_required === '1'
-      ).length
+    summaryReclean() {
+      return this.todos.filter(t => t.reclean_required === '1').length
     }
   },
 
@@ -244,11 +247,24 @@ export default {
           ...todo,
           _saving: false
         }))
+
+        this.detectAutoExpandGroup()
       } catch {
         this.error = true
       } finally {
         this.loading = false
       }
+    },
+
+    detectAutoExpandGroup() {
+      // priority: reclean > pending
+      const problematicTodo =
+        this.todos.find(t => t.reclean_required === '1') ||
+        this.todos.find(t => t.answer !== '1')
+
+      if (!problematicTodo) return
+
+      this.autoExpandGroupId = problematicTodo.group_id
     },
 
     todosByGroup(groupId) {

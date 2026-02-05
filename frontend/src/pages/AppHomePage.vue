@@ -48,23 +48,44 @@
     <div v-else>
       <p>
         <strong>Cities:</strong> {{ cities.length }}<br />
-        <strong>Properties:</strong> {{ filteredProperties.length }}
+        <strong>Properties:</strong> {{ filteredAndSortedProperties.length }}
       </p>
 
       <q-list bordered class="q-mt-md">
         <q-item
-          v-for="property in filteredProperties"
+          v-for="property in filteredAndSortedProperties"
           :key="property.value"
           clickable
           @click="$router.push(`/app/property/${property.value}`)"
         >
           <q-item-section>
-            <q-item-label>{{ property.label }}</q-item-label>
+            <q-item-label>
+              {{ property.label }}
+            </q-item-label>
+
             <q-item-label caption>
               {{ property.city_name }}
-              • Session started:
-              {{ property.is_session_started === '1' ? 'Yes' : 'No' }}
             </q-item-label>
+          </q-item-section>
+
+          <!-- SESSION STATUS + TIME -->
+          <q-item-section side>
+            <div class="column items-end">
+              <q-chip
+                dense
+                :color="sessionStatusColor(property)"
+                text-color="white"
+              >
+                {{ $t(sessionStatusLabel(property)) }}
+              </q-chip>
+
+              <div
+                v-if="sessionDuration(property)"
+                class="text-caption text-grey-7 q-mt-xs"
+              >
+                {{ sessionDuration(property) }}
+              </div>
+            </div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -85,8 +106,6 @@ export default {
       error: false,
       cities: [],
       properties: [],
-
-      // filters
       selectedCity: null,
       addressFilter: ''
     }
@@ -105,8 +124,8 @@ export default {
       return this.cities
     },
 
-    filteredProperties() {
-      return this.properties.filter(property => {
+    filteredAndSortedProperties() {
+      const filtered = this.properties.filter(property => {
         const matchCity =
           !this.selectedCity || property.city_id === this.selectedCity
 
@@ -117,6 +136,12 @@ export default {
             .includes(this.addressFilter.toLowerCase())
 
         return matchCity && matchAddress
+      })
+
+      return filtered.sort((a, b) => {
+        if (a.is_session_started === '1' && b.is_session_started !== '1') return -1
+        if (a.is_session_started !== '1' && b.is_session_started === '1') return 1
+        return 0
       })
     }
   },
@@ -134,7 +159,6 @@ export default {
 
         this.cities = response.data?.cities || []
         this.properties = response.data?.properties || []
-
       } catch {
         this.error = true
       } finally {
@@ -145,6 +169,38 @@ export default {
     logout() {
       this.session.clearSession()
       this.$router.push('/')
+    },
+
+    sessionStatusLabel(property) {
+      return property.is_session_started === '1'
+        ? 'property.session.in_progress'
+        : 'property.session.not_started'
+    },
+
+    sessionStatusColor(property) {
+      if (property.is_session_started !== '1') return 'grey'
+
+      const minutes = this.sessionMinutes(property)
+      if (minutes < 30) return 'blue'
+      if (minutes < 90) return 'amber'
+      return 'red'
+    },
+
+    sessionMinutes(property) {
+      if (!property.session_started_at) return null
+      const start = new Date(property.session_started_at.replace(' ', 'T'))
+      const now = new Date()
+      return Math.floor((now - start) / 60000)
+    },
+
+    sessionDuration(property) {
+      const minutes = this.sessionMinutes(property)
+      if (!minutes) return null
+
+      if (minutes < 60) return `${minutes}m ago`
+      const h = Math.floor(minutes / 60)
+      const m = minutes % 60
+      return `${h}h ${m}m ago`
     }
   },
 

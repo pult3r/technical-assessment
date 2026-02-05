@@ -30,7 +30,7 @@
     "error": "Algo salió mal."
   },
   "app": {
-    "title": "Aplicación de Limpieza",
+    "title": "Aplicación de Limppieza",
     "logged_as": "Conectado como",
     "loading": "Cargando apartamentos…",
     "error": "No se pudieron cargar los datos.",
@@ -50,6 +50,23 @@
       "not_started": "No iniciado",
       "in_progress": "En progreso",
       "completed": "Completado"
+    },
+    "session": {
+      "not_started": "No iniciado",
+      "in_progress": "Limpieza en curso"
+    },
+    "reclean": {
+      "required": "Re-limpieza requerida",
+      "in_progress": "Re-limpieza en curso",
+      "resolved": "Re-limpieza completada",
+      "required_desc": "Algunos elementos fueron marcados para re-limpieza después de la verificación.",
+      "in_progress_desc": "Todos los elementos han sido corregidos. Esperando verificación.",
+      "resolved_desc": "La re-limpieza se ha completado correctamente."
+    },
+    "summary": {
+      "completed": "Completado",
+      "pending": "Pendiente",
+      "reclean": "Re-limpieza"
     }
   }
 }

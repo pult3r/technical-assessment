@@ -50,6 +50,23 @@
       "not_started": "Nie rozpoczęto",
       "in_progress": "W trakcie",
       "completed": "Zakończone"
+    },
+    "session": {
+      "not_started": "Nie rozpoczęto",
+      "in_progress": "Sprzątanie w toku"
+    },
+    "reclean": {
+      "required": "Wymagane ponowne sprzątanie",
+      "in_progress": "Ponowne sprzątanie w toku",
+      "resolved": "Ponowne sprzątanie zakończone",
+      "required_desc": "Niektóre elementy wymagają ponownego sprzątania po weryfikacji.",
+      "in_progress_desc": "Wszystkie elementy zostały poprawione. Oczekiwanie na weryfikację.",
+      "resolved_desc": "Ponowne sprzątanie zostało zakończone."
+    },
+    "summary": {
+      "completed": "Wykonane",
+      "pending": "Do zrobienia",
+      "reclean": "Re-clean"
     }
   }
 }
