@@ -1,44 +1,55 @@
 {
   "login": {
-    "title": "Iniciar sessão",
-    "username": "Nome de utilizador",
-    "password": "Palavra-passe",
+    "title": "Entrar",
+    "username": "Usuário",
+    "password": "Senha",
     "button": "Entrar",
     "go_register": "Criar conta",
-    "error": "Nome de utilizador ou palavra-passe inválidos.",
+    "error": "Usuário ou senha inválidos.",
     "validation_required": "Todos os campos são obrigatórios."
   },
   "register": {
-    "title": "Registo",
-    "username": "Nome de utilizador",
-    "email": "E-mail",
-    "password": "Palavra-passe",
+    "title": "Registro",
+    "username": "Usuário",
+    "email": "Email",
+    "password": "Senha",
     "button": "Criar conta",
-    "go_login": "Já tem uma conta? Inicie sessão",
+    "go_login": "Já tem uma conta? Entrar",
     "error": "Falha ao criar a conta.",
-    "validation_username": "O nome de utilizador deve ter pelo menos 3 caracteres.",
-    "validation_email": "Formato de e-mail inválido.",
-    "validation_password": "A palavra-passe deve ter pelo menos 6 caracteres.",
+    "validation_username": "O usuário deve ter pelo menos 3 caracteres.",
+    "validation_email": "Formato de email inválido.",
+    "validation_password": "A senha deve ter pelo menos 6 caracteres.",
     "validation_required": "Todos os campos são obrigatórios."
   },
   "common": {
-    "logout": "Terminar sessão",
+    "logout": "Sair",
     "yes": "Sim",
-    "no": "Não"
+    "no": "Não",
+    "back": "Voltar",
+    "loading": "Carregando…",
+    "error": "Algo deu errado."
   },
   "app": {
-    "title": "Aplicação de limpeza",
-    "logged_as": "Ligado como",
-    "loading": "A carregar apartamentos…",
-    "error": "Falha ao carregar os dados.",
+    "title": "App de Limpeza",
+    "logged_as": "Conectado como",
+    "loading": "Carregando apartamentos…",
+    "error": "Falha ao carregar dados.",
     "filters": {
       "city": "Filtrar por cidade",
       "address": "Filtrar por endereço"
     },
     "stats": {
       "cities": "Cidades",
-      "properties": "Apartamentos"
+      "properties": "Propriedades"
     },
     "session_started": "Sessão iniciada"
+  },
+  "property": {
+    "progress": "Progresso",
+    "status": {
+      "not_started": "Não iniciado",
+      "in_progress": "Em progresso",
+      "completed": "Concluído"
+    }
   }
 }

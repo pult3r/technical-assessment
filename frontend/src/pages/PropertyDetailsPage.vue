@@ -40,15 +40,30 @@
         />
       </div>
 
-      <!-- 🟢 STATUS -->
-      <div class="q-mb-lg">
-        <q-chip
-          :color="statusColor"
-          text-color="white"
-          icon="home"
+      <!-- 🟢 STATUS + RE-CLEAN BADGE -->
+      <div class="q-mb-lg row items-center q-col-gutter-sm">
+        <div class="col-auto">
+          <q-chip
+            :color="statusColor"
+            text-color="white"
+            icon="home"
+          >
+            {{ $t(statusLabel) }}
+          </q-chip>
+        </div>
+
+        <div
+          v-if="recleanCount > 0"
+          class="col-auto"
         >
-          {{ $t(statusLabel) }}
-        </q-chip>
+          <q-chip
+            color="orange-2"
+            text-color="orange-9"
+            icon="warning"
+          >
+            {{ recleanCount }} {{ $t('property.needs_reclean') }}
+          </q-chip>
+        </div>
       </div>
 
       <!-- GROUPS -->
@@ -175,7 +190,7 @@ export default {
     },
 
     completedTotal() {
-      return this.todos.filter(t => t.answer === '1').length
+      return this.todos.filter(this.isTodoCompleted).length
     },
 
     globalProgress() {
@@ -183,7 +198,7 @@ export default {
       return this.completedTotal / this.totalTodos
     },
 
-    // 🔹 STATUS LOGIC
+    // 🔹 STATUS
     statusLabel() {
       if (this.completedTotal === 0) {
         return 'property.status.not_started'
@@ -198,6 +213,13 @@ export default {
       if (this.completedTotal === 0) return 'grey'
       if (this.completedTotal < this.totalTodos) return 'orange'
       return 'green'
+    },
+
+    // 🟠 RE-CLEAN COUNTER
+    recleanCount() {
+      return this.todos.filter(
+        t => t.reclean_required === '1'
+      ).length
     }
   },
 
@@ -233,14 +255,17 @@ export default {
       return this.todos.filter(todo => todo.group_id === groupId)
     },
 
+    isTodoCompleted(todo) {
+      return todo.answer === '1' && todo.reclean_required !== '1'
+    },
+
     totalCount(groupId) {
       return this.todosByGroup(groupId).length
     },
 
     completedCount(groupId) {
-      return this.todosByGroup(groupId).filter(
-        todo => todo.answer === '1'
-      ).length
+      return this.todosByGroup(groupId)
+        .filter(this.isTodoCompleted).length
     },
 
     groupProgress(groupId) {

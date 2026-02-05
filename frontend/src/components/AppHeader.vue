@@ -2,10 +2,22 @@
   <q-header elevated>
     <q-toolbar>
 
-      <q-toolbar-title>
-        {{ $t('app.title') }}
-      </q-toolbar-title>
+      <!-- LOGO + TITLE -->
+      <div class="row items-center no-wrap">
+        <img
+          src="~assets/student-cribs-logo.svg"
+          alt="Student Cribs"
+          class="header-logo q-mr-sm"
+        />
 
+        <q-toolbar-title class="text-weight-medium">
+          Student Cribs
+        </q-toolbar-title>
+      </div>
+
+      <q-space />
+
+      <!-- LANGUAGE SELECTOR -->
       <q-select
         v-model="currentLocale"
         :options="locales"
@@ -17,6 +29,7 @@
         @update:model-value="changeLanguage"
       />
 
+      <!-- LOGOUT -->
       <q-btn
         flat
         dense
@@ -31,7 +44,6 @@
 
 <script>
 import { useSessionStore } from 'src/stores/session'
-import { i18n } from 'src/boot/i18n'
 
 export default {
   name: 'AppHeader',
@@ -50,7 +62,7 @@ export default {
 
   methods: {
     changeLanguage(lang) {
-      i18n.global.locale.value = lang
+      this.$i18n.locale = lang
       localStorage.setItem('locale', lang)
     },
 
@@ -62,3 +74,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.header-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+</style>

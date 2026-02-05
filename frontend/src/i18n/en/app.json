@@ -24,7 +24,10 @@
   "common": {
     "logout": "Logout",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "back": "Back",
+    "loading": "Loading…",
+    "error": "Something went wrong."
   },
   "app": {
     "title": "Cleaning App",
@@ -40,5 +43,13 @@
       "properties": "Properties"
     },
     "session_started": "Session started"
+  },
+  "property": {
+    "progress": "Progress",
+    "status": {
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "completed": "Completed"
+    }
   }
 }
