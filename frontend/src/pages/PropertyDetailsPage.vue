@@ -36,7 +36,10 @@
           :value="globalProgress"
           rounded
           size="10px"
-          color="primary"
+          color="transparent"
+          track-color="transparent"
+          :style="progressStyle(globalProgress)"
+          class="progress-bar"
         />
       </div>
 
@@ -124,7 +127,10 @@
               :value="groupProgress(group.id)"
               rounded
               size="8px"
-              color="primary"
+              color="transparent"
+              track-color="transparent"
+              :style="progressStyle(groupProgress(group.id))"
+              class="progress-bar"
             />
           </div>
 
@@ -212,7 +218,6 @@ export default {
       return this.completedTotal / this.totalTodos
     },
 
-    /* SUMMARY */
     summaryCompleted() {
       return this.todos.filter(this.isTodoCompleted).length
     },
@@ -257,13 +262,11 @@ export default {
     },
 
     detectAutoExpandGroup() {
-      // priority: reclean > pending
       const problematicTodo =
         this.todos.find(t => t.reclean_required === '1') ||
         this.todos.find(t => t.answer !== '1')
 
       if (!problematicTodo) return
-
       this.autoExpandGroupId = problematicTodo.group_id
     },
 
@@ -312,6 +315,23 @@ export default {
       ).trim()
     },
 
+    progressStyle(value) {
+      const start = { r: 255, g: 167, b: 38 }
+      const end = { r: 76, g: 175, b: 80 }
+
+      const r = Math.round(start.r + (end.r - start.r) * value)
+      const g = Math.round(start.g + (end.g - start.g) * value)
+      const b = Math.round(start.b + (end.b - start.b) * value)
+
+      return {
+        background: `linear-gradient(
+          90deg,
+          rgb(${r}, ${g}, ${b}) ${value * 100}%,
+          #e0e0e0 ${value * 100}%
+        )`
+      }
+    },
+
     async toggleTodo(todo, checked) {
       const previous = todo.answer
       const nextValue = checked ? '1' : '0'
@@ -344,3 +364,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.progress-bar {
+  background: #e0e0e0;
+  transition: background 0.3s ease;
+}
+</style>
