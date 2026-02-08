@@ -1,0 +1,8 @@
+.property-reclean {
+  background: rgba(255, 167, 38, 0.12);
+}
+
+.progress-bar {
+  background: #e0e0e0;
+  transition: background 0.3s ease;
+}
